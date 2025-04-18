@@ -1,0 +1,214 @@
+/* General Styles */
+body {
+    background-color: #000;
+    color: #eee;
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', Courier, monospace;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    /* Hide default cursor on body */
+    cursor: none !important;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Universal Selector to Force Cursor Hiding Everywhere */
+* {
+    cursor: none !important;
+}
+
+/* Entry Screen */
+#entry-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+    overflow: visible;
+}
+
+#entry-screen p {
+     font-size: 1.5em;
+     color: #eee;
+     text-shadow: none;
+     position: static;
+     animation: none;
+}
+
+#entry-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Main Content Area */
+#main-content {
+    display: none;
+    text-align: center;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 1s ease-in;
+}
+
+#main-content.visible {
+    display: flex;
+    opacity: 1;
+}
+
+/* Title Styling (ASCII Art) */
+.faith-title { /* Class name kept, applies to 'WAVY' art now */
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem; /* Current size */
+    line-height: 1.0;
+    margin-bottom: 1.5rem;
+    font-weight: normal;
+    text-align: center;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    color: #ff00ff;
+    text-shadow: 0 0 6px #ff00ff, 0 0 10px #ff00ff;
+    animation: none;
+}
+
+/* Icon Links */
+.icon-links {
+    margin-bottom: 2rem;
+}
+
+.icon-links a {
+    color: #ff00ff;
+    text-decoration: none;
+    font-size: 2rem;
+    margin: 0 0.75rem;
+    transition: color 0.3s, text-shadow 0.3s;
+    text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff;
+    animation: color-change-icons 6s linear infinite;
+    display: inline-block;
+}
+
+.icon-links a i {
+    display: block;
+}
+
+@keyframes color-change-icons {
+    0%   { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; }
+    33%  { color: #00ffff; text-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff; }
+    66%  { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; }
+    100% { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; }
+}
+
+.icon-links a:hover {
+    color: #fff;
+    text-shadow: 0 0 6px #ff00ff, 0 0 12px #ff00ff, 0 0 18px #ff00ff;
+}
+
+/* Contact Info */
+.contact-info {
+    margin-bottom: 1rem;
+}
+.contact-info p {
+    margin: 0.3rem 0;
+}
+
+.neon-pink-text {
+    font-size: 1rem;
+    color: #ff00ff;
+    text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
+}
+
+/* Footer Credit Link */
+.footer-credit {
+    position: fixed;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 50;
+    display: block;
+    font-size: 0.7rem;
+    color: #ff00ff;
+    text-shadow: 0 0 3px #ff00ff;
+    text-decoration: none;
+    transition: color 0.3s, text-shadow 0.3s;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.footer-credit:hover {
+    color: #fff;
+    text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
+}
+
+
+/* --- Custom Cursor --- */
+#custom-cursor {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    left: -100px;
+    top: -100px;
+    font-size: 2rem;
+    line-height: 1;
+    text-align: center;
+    background-color: transparent;
+    animation: cursor-color-change-text 4s linear infinite;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+}
+
+#custom-cursor::before,
+#custom-cursor::after {
+    content: none;
+}
+
+@keyframes cursor-color-change-text {
+    0%   { color: #ff00ff; }
+    33%  { color: #9d00ff; }
+    66%  { color: #ff0033; }
+    100% { color: #ff00ff; }
+}
+
+/* Cursor Trail */
+.trail-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 1;
+    animation: fade-out 0.8s linear forwards, cursor-color-change-trail 4s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes cursor-color-change-trail {
+    0%   { background-color: #ff00ff; }
+    33%  { background-color: #9d00ff; }
+    66%  { background-color: #ff0033; }
+    100% { background-color: #ff00ff; }
+}
+
+@keyframes fade-out {
+    to {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+}

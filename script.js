@@ -1,68 +1,67 @@
-// Simplified script.js for debugging
-
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Loaded. Trying to select elements..."); // Debug message
-
     // Select necessary elements
     const entryScreen = document.getElementById('entry-screen');
     const mainContent = document.getElementById('main-content');
-    // const backgroundMusic = document.getElementById('background-music'); // Temporarily comment out music
+    const backgroundMusic = document.getElementById('background-music');
     const customCursor = document.getElementById('custom-cursor');
     const allIconLinks = document.querySelectorAll('.icon-link');
     const footerLink = document.querySelector('.footer-credit');
-    // const visitCountSpan = document.getElementById('visit-count'); // Temporarily comment out counter display
-    // const discordTrigger = document.getElementById('discord-pop-trigger'); // Temporarily comment out popup trigger
-    // const discordPopup = document.getElementById('discord-popup'); // Temporarily comment out popup
-
-    // Check if elements were selected
-    if (!entryScreen) console.error("Entry Screen not found!");
-    if (!mainContent) console.error("Main Content not found!");
-    if (!customCursor) console.error("Custom Cursor not found!");
+    const visitCountSpan = document.getElementById('visit-count');
+    const discordTrigger = document.getElementById('discord-pop-trigger');
+    const discordPopup = document.getElementById('discord-popup');
 
     // Set the initial content for the custom cursor
     if (customCursor) {
         customCursor.textContent = '𖹭';
-        console.log("Custom cursor text set."); // Debug message
     }
 
-    // --- Fake View Counter Logic DISABLED ---
-
-    // --- Browser Tab Title Animation DISABLED ---
-
-    // --- Entry Screen Logic (Simplified) ---
-    if (entryScreen) {
-        entryScreen.addEventListener('click', () => {
-            console.log("Entry screen clicked!"); // Debug message
-            entryScreen.classList.add('hidden');
-            setTimeout(() => {
-                entryScreen.style.display = 'none';
-                if (mainContent) {
-                    mainContent.classList.add('visible');
-                    console.log("Main content should be visible."); // Debug message
-                } else {
-                    console.error("Main Content element missing inside click handler!");
-                }
-                // Temporarily disable music play on entry
-                // backgroundMusic.play().catch(error => {
-                //     console.warn("Background music autoplay failed.", error);
-                // });
-            }, 500);
-        }, { once: true });
-        console.log("Entry screen listener added."); // Debug message
-    } else {
-         console.error("Could not add listener to entry screen because it wasn't found.");
+    // --- Fake View Counter Logic START ---
+    if (visitCountSpan) {
+        let currentCount = localStorage.getItem('pageVisits_worrySite');
+        let visitNumber = 0;
+        if (currentCount && !isNaN(parseInt(currentCount))) {
+            visitNumber = parseInt(currentCount);
+        }
+        visitNumber += 1;
+        visitCountSpan.textContent = visitNumber;
+        localStorage.setItem('pageVisits_worrySite', visitNumber.toString());
     }
+    // --- Fake View Counter Logic END ---
+
+
+    // --- Browser Tab Title Animation ---
+    const titles = ['m', 'me', 'mew', 'mewo', 'meow', 'meow .', 'meow ..', 'meow ...', 'meow ..', 'meow .'];
+    let titleIndex = 0;
+    setInterval(() => {
+        document.title = titles[titleIndex];
+        titleIndex = (titleIndex + 1) % titles.length;
+    }, 600);
+
+
+    // --- Entry Screen Logic ---
+    entryScreen.addEventListener('click', () => {
+        entryScreen.classList.add('hidden');
+        setTimeout(() => {
+            entryScreen.style.display = 'none';
+            mainContent.classList.add('visible');
+
+            // Play music immediately after entry screen hides
+            backgroundMusic.play().catch(error => {
+                console.warn("Background music autoplay failed.", error);
+            });
+
+        }, 500);
+    }, { once: true });
 
 
     // --- Custom Cursor Tracking and Trail ---
-    if (customCursor) {
-        document.addEventListener('mousemove', (e) => {
+    document.addEventListener('mousemove', (e) => {
+        if (customCursor) {
             customCursor.style.left = `${e.clientX}px`;
             customCursor.style.top = `${e.clientY}px`;
-            createTrailDot(e.clientX, e.clientY);
-        });
-        console.log("Mousemove listener added for cursor."); // Debug message
-    }
+        }
+        createTrailDot(e.clientX, e.clientY);
+    });
 
     function createTrailDot(x, y) {
         const dot = document.createElement('div');
@@ -75,33 +74,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 800);
     }
 
-    // --- Basic Icon/Footer Link Double-Click Logic ---
-    // (Excludes Discord popup logic for now)
+    // --- Icon Link Click Logic ---
     allIconLinks.forEach(link => {
-        if (link.id !== 'discord-pop-trigger') { // Apply only to non-discord icons for now
-             link.addEventListener('click', (event) => { event.preventDefault(); });
-             link.addEventListener('dblclick', (event) => {
-                 const targetLink = event.currentTarget.href;
-                 if (targetLink && targetLink !== '#') { // Check href exists and is not just #
-                     window.open(targetLink, '_blank');
-                 }
-             });
+        if (link.id === 'discord-pop-trigger') {
+            // SINGLE Click for Discord Popup
+            link.addEventListener('click', (event) => {
+                event.preventDefault();
+                if(discordPopup) {
+                    discordPopup.classList.toggle('visible');
+                }
+            });
+        } else if (link.classList.contains('double-clickable')) {
+             // DOUBLE Click for other links
+            link.addEventListener('click', (event) => {
+                event.preventDefault();
+            });
+            link.addEventListener('dblclick', (event) => {
+                const targetLink = event.currentTarget.href;
+                if (targetLink) {
+                    window.open(targetLink, '_blank');
+                }
+            });
         } else {
-             // Prevent default for discord icon too, but don't add dblclick yet
-             link.addEventListener('click', (event) => { event.preventDefault(); });
+              link.addEventListener('click', (event) => {
+                event.preventDefault();
+             });
         }
     });
+
+    // --- Close Popup when Clicking Outside ---
+    document.addEventListener('click', function(event) {
+        if (discordPopup && discordTrigger) {
+            const isClickInsidePopup = discordPopup.contains(event.target);
+            const isClickOnTrigger = discordTrigger.contains(event.target);
+
+            if (discordPopup.classList.contains('visible') && !isClickInsidePopup && !isClickOnTrigger) {
+                discordPopup.classList.remove('visible');
+            }
+        }
+    });
+
+    // --- Footer Link Double-Click Logic ---
     if (footerLink) {
-        footerLink.addEventListener('click', (event) => { event.preventDefault(); });
+        footerLink.addEventListener('click', (event) => {
+            event.preventDefault();
+        });
         footerLink.addEventListener('dblclick', (event) => {
             const targetLink = event.currentTarget.href;
-            if (targetLink) { window.open(targetLink, '_blank'); }
+            if (targetLink) {
+                window.open(targetLink, '_blank');
+            }
         });
     }
-     console.log("Basic link listeners added."); // Debug message
-
-    // --- Close Popup Logic DISABLED ---
 
 });
-
-console.log("script.js loaded."); // Debug message at end of file

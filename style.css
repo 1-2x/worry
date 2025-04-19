@@ -60,8 +60,7 @@ body {
     justify-content: center;
     opacity: 0;
     transition: opacity 1s ease-in;
-    /* Adjusted padding for fixed footer + counter */
-    padding-bottom: 60px;
+    padding-bottom: 60px; /* Padding for fixed footer + counter */
     position: relative; /* Needed for positioning the absolute popup */
 }
 
@@ -73,7 +72,7 @@ body {
 /* Title Styling (ASCII Art) */
 .faith-title { /* Class name kept, applies to 'WAVY' art now */
     font-family: 'Courier New', Courier, monospace;
-    font-size: 0.9rem; /* Current size */
+    font-size: 0.9rem; /* Small size */
     line-height: 1.0;
     margin-bottom: 1.5rem;
     font-weight: normal;
@@ -89,10 +88,10 @@ body {
 /* Icon Links */
 .icon-links {
     margin-bottom: 2rem;
-    position: relative; /* Added for popup positioning context */
+    position: relative;
 }
 
-.icon-links a.icon-link { /* Applied specific class */
+.icon-links a.icon-link {
     color: #ff00ff;
     text-decoration: none;
     font-size: 2rem;
@@ -102,7 +101,6 @@ body {
     animation: color-change-icons 6s linear infinite;
     display: inline-block;
 }
-/* Keep consistent animation for discord trigger */
 .icon-links a#discord-pop-trigger {
      animation: color-change-icons 6s linear infinite;
 }
@@ -123,8 +121,6 @@ body {
     color: #fff;
     text-shadow: 0 0 6px #ff00ff, 0 0 12px #ff00ff, 0 0 18px #ff00ff;
 }
-
-/* Contact Info CSS REMOVED */
 
 /* Discord Popup START */
 .popup-menu {

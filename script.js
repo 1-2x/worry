@@ -6,19 +6,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const customCursor = document.getElementById('custom-cursor');
     const iconLinks = document.querySelectorAll('.icon-link');
     const footerLink = document.querySelector('.footer-credit');
+    // const visitCountSpan = document.getElementById('visit-count'); // REMOVED
 
     // Set the initial content for the custom cursor
     if (customCursor) {
         customCursor.textContent = '𖹭';
     }
 
+    // --- Fake View Counter Logic REMOVED ---
+
+
     // --- Browser Tab Title Animation ---
     const titles = ['m', 'me', 'mew', 'mewo', 'meow', 'meow .', 'meow ..', 'meow ...', 'meow ..', 'meow .'];
     let titleIndex = 0;
     setInterval(() => {
         document.title = titles[titleIndex];
-        titleIndex = (titleIndex + 1) % titles.length; // Cycle through the array
-    }, 600); // Adjust speed if needed
+        titleIndex = (titleIndex + 1) % titles.length;
+    }, 600);
 
 
     // --- Entry Screen Logic ---

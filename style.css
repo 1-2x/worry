@@ -10,7 +10,6 @@ body {
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    /* Hide default cursor on body */
     cursor: none !important;
     user-select: none;
     -webkit-user-select: none;
@@ -18,7 +17,6 @@ body {
     -ms-user-select: none;
 }
 
-/* Universal Selector to Force Cursor Hiding Everywhere */
 * {
     cursor: none !important;
 }
@@ -62,6 +60,8 @@ body {
     justify-content: center;
     opacity: 0;
     transition: opacity 1s ease-in;
+    /* Adjusted padding for fixed footer */
+    padding-bottom: 40px;
 }
 
 #main-content.visible {
@@ -70,9 +70,9 @@ body {
 }
 
 /* Title Styling (ASCII Art) */
-.faith-title { /* Class name kept, applies to 'WAVY' art now */
+.faith-title {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 0.9rem; /* Current size */
+    font-size: 0.9rem;
     line-height: 1.0;
     margin-bottom: 1.5rem;
     font-weight: normal;
@@ -119,6 +119,7 @@ body {
 
 /* Contact Info */
 .contact-info {
+    /* Adjusted margin to account for footer */
     margin-bottom: 1rem;
 }
 .contact-info p {
@@ -130,6 +131,12 @@ body {
     color: #ff00ff;
     text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
 }
+
+/* View Counter Area CSS REMOVED */
+/* #blinking-eye CSS REMOVED */
+/* #visit-count CSS REMOVED */
+/* @keyframes blink-animation REMOVED */
+
 
 /* Footer Credit Link */
 .footer-credit {

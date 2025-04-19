@@ -4,11 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainContent = document.getElementById('main-content');
     const backgroundMusic = document.getElementById('background-music');
     const customCursor = document.getElementById('custom-cursor');
-    const allIconLinks = document.querySelectorAll('.icon-link'); // Select ALL icons first
+    const allIconLinks = document.querySelectorAll('.icon-link');
     const footerLink = document.querySelector('.footer-credit');
     const visitCountSpan = document.getElementById('visit-count');
-    const discordTrigger = document.getElementById('discord-pop-trigger'); // Discord icon
-    const discordPopup = document.getElementById('discord-popup'); // The popup menu
+    const discordTrigger = document.getElementById('discord-pop-trigger');
+    const discordPopup = document.getElementById('discord-popup');
 
     // Set the initial content for the custom cursor
     if (customCursor) {
@@ -35,17 +35,30 @@ document.addEventListener('DOMContentLoaded', () => {
         titleIndex = (titleIndex + 1) % titles.length;
     }, 600);
 
+
     // --- Entry Screen Logic ---
     entryScreen.addEventListener('click', () => {
         entryScreen.classList.add('hidden');
         setTimeout(() => {
             entryScreen.style.display = 'none';
             mainContent.classList.add('visible');
+
+            // Play music immediately after entry screen hides
             backgroundMusic.play().catch(error => {
                 console.warn("Background music autoplay failed.", error);
+                 // Browsers might block autoplay until another interaction
+                 // If it fails here, user might need to click again for it to start
             });
+
+            // Removed the listener that waited for the next click
+            // document.addEventListener('click', playMusicOnFirstClick, { once: true });
+
         }, 500);
     }, { once: true });
+
+    // --- Function to play music on first click REMOVED ---
+    // function playMusicOnFirstClick() { ... }
+
 
     // --- Custom Cursor Tracking and Trail ---
     document.addEventListener('mousemove', (e) => {
@@ -68,20 +81,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Icon Link Click Logic ---
-    // Separate logic for Discord trigger vs other icons
     allIconLinks.forEach(link => {
         if (link.id === 'discord-pop-trigger') {
             // SINGLE Click for Discord Popup
             link.addEventListener('click', (event) => {
-                event.preventDefault(); // Prevent navigating anywhere
+                event.preventDefault();
                 if(discordPopup) {
                     discordPopup.classList.toggle('visible');
                 }
+                // event.stopPropagation(); // No longer needed
             });
         } else if (link.classList.contains('double-clickable')) {
              // DOUBLE Click for other links
             link.addEventListener('click', (event) => {
-                event.preventDefault(); // Prevent single-click navigation
+                event.preventDefault();
+                 // event.stopPropagation(); // No longer needed
             });
             link.addEventListener('dblclick', (event) => {
                 const targetLink = event.currentTarget.href;
@@ -90,9 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         } else {
-             // Fallback for any other .icon-link without specific behavior
               link.addEventListener('click', (event) => {
                 event.preventDefault();
+                 // event.stopPropagation(); // No longer needed
              });
         }
     });
@@ -100,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Close Popup when Clicking Outside ---
     document.addEventListener('click', function(event) {
         if (discordPopup && discordTrigger) {
-            // Check if the popup is visible AND the click was NOT on the trigger icon AND NOT inside the popup menu
             const isClickInsidePopup = discordPopup.contains(event.target);
             const isClickOnTrigger = discordTrigger.contains(event.target);
 
@@ -114,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (footerLink) {
         footerLink.addEventListener('click', (event) => {
             event.preventDefault();
+            // event.stopPropagation(); // No longer needed
         });
         footerLink.addEventListener('dblclick', (event) => {
             const targetLink = event.currentTarget.href;

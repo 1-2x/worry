@@ -60,7 +60,8 @@ body {
     justify-content: center;
     opacity: 0;
     transition: opacity 1s ease-in;
-    padding-bottom: 60px; /* Padding for fixed footer + counter */
+    /* Adjusted padding for fixed footer + counter */
+    padding-bottom: 60px;
     position: relative; /* Needed for positioning the absolute popup */
 }
 
@@ -70,9 +71,9 @@ body {
 }
 
 /* Title Styling (ASCII Art) */
-.faith-title {
+.faith-title { /* Class name kept, applies to 'WAVY' art now */
     font-family: 'Courier New', Courier, monospace;
-    font-size: 0.9rem;
+    font-size: 0.9rem; /* Current size */
     line-height: 1.0;
     margin-bottom: 1.5rem;
     font-weight: normal;
@@ -101,10 +102,9 @@ body {
     animation: color-change-icons 6s linear infinite;
     display: inline-block;
 }
-/* Special case for discord trigger */
+/* Keep consistent animation for discord trigger */
 .icon-links a#discord-pop-trigger {
-    animation: none; /* Stop color change maybe? Or keep it? Let's keep it for consistency */
-    /* animation: color-change-icons 6s linear infinite; */
+     animation: color-change-icons 6s linear infinite;
 }
 
 
@@ -125,25 +125,24 @@ body {
 }
 
 /* Contact Info CSS REMOVED */
-/* .neon-pink-text CSS REMOVED (unless needed elsewhere) */
 
 /* Discord Popup START */
 .popup-menu {
-    position: absolute; /* Position relative to main-content or icon-links */
-    top: 100%; /* Position below the icon links row */
+    position: absolute;
+    top: 100%;
     left: 50%;
-    transform: translateX(-50%); /* Center the popup */
-    background-color: rgba(10, 0, 20, 0.9); /* Dark semi-transparent */
-    border: 2px solid #9d00ff; /* Neon purple border */
-    box-shadow: 0 0 10px #9d00ff, 0 0 20px #9d00ff, inset 0 0 5px rgba(157, 0, 255, 0.5); /* Neon glow */
+    transform: translateX(-50%);
+    background-color: rgba(10, 0, 20, 0.9);
+    border: 2px solid #9d00ff;
+    box-shadow: 0 0 10px #9d00ff, 0 0 20px #9d00ff, inset 0 0 5px rgba(157, 0, 255, 0.5);
     padding: 15px 20px;
     border-radius: 8px;
-    z-index: 1050; /* High z-index */
-    margin-top: 15px; /* Space below icons */
+    z-index: 1050;
+    margin-top: 15px;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
-    min-width: 250px; /* Ensure minimum width */
+    min-width: 250px;
 }
 
 .popup-menu.visible {
@@ -167,12 +166,12 @@ body {
 }
 
 .popup-discord-icon {
-    color: #bbb; /* Slightly muted discord icon */
+    color: #bbb;
     font-size: 1.2rem;
     transition: color 0.2s ease;
 }
 .popup-discord-link:hover .popup-discord-icon {
-     color: #7289da; /* Discord brand color on hover */
+     color: #7289da;
 }
 
 .popup-text {
@@ -181,13 +180,12 @@ body {
 }
 
 /* Multicolor Neon Text */
-.multicolor-neon span { /* Target each letter span */
-    display: inline-block; /* Needed for animations potentially */
+.multicolor-neon span {
+    display: inline-block;
     animation: multicolor-letter-glow 5s linear infinite;
     text-shadow: 0 0 2px currentColor, 0 0 4px currentColor;
 }
 
-/* Stagger animation delay for each letter */
 .multicolor-neon span:nth-child(1) { animation-delay: 0.0s; }
 .multicolor-neon span:nth-child(2) { animation-delay: 0.2s; }
 .multicolor-neon span:nth-child(3) { animation-delay: 0.4s; }
@@ -195,20 +193,19 @@ body {
 .multicolor-neon span:nth-child(5) { animation-delay: 0.8s; }
 .multicolor-neon span:nth-child(6) { animation-delay: 1.0s; }
 .multicolor-neon span:nth-child(7) { animation-delay: 1.2s; }
-/* Add more if needed for longer words */
 
 @keyframes multicolor-letter-glow { /* Red -> Purple -> Dark Blue -> Pink -> Cyan -> Red */
-    0%   { color: #ff0000; } /* Red */
-    20%  { color: #9d00ff; } /* Purple */
-    40%  { color: #0000ff; } /* Dark Blue */
-    60%  { color: #ff00ff; } /* Pink */
-    80%  { color: #00ffff; } /* Cyan */
-    100% { color: #ff0000; } /* Back to Red */
+    0%   { color: #ff0000; }
+    20%  { color: #9d00ff; }
+    40%  { color: #0000ff; }
+    60%  { color: #ff00ff; }
+    80%  { color: #00ffff; }
+    100% { color: #ff0000; }
 }
 /* Discord Popup END */
 
 
-/* Fake View Counter Area */
+/* Fake View Counter Area START */
 #view-counter-area {
     position: fixed;
     bottom: 35px;
@@ -223,7 +220,7 @@ body {
     gap: 8px;
 }
 
-#color-changing-eye { /* Was blinking-eye, now color */
+#color-changing-eye {
     font-size: 0.9rem;
     animation: color-change-eye 4s linear infinite alternate;
 }
@@ -235,10 +232,12 @@ body {
     min-width: 10px;
 }
 
+/* Color Changing Animation for Eye */
 @keyframes color-change-eye {
     0%   { color: #ff0000; } /* Red */
     100% { color: #9d00ff; } /* Purple */
 }
+/* Fake View Counter Area END */
 
 
 /* Footer Credit Link */

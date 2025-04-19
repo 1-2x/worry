@@ -60,7 +60,8 @@ body {
     justify-content: center;
     opacity: 0;
     transition: opacity 1s ease-in;
-    padding-bottom: 40px; /* Padding for fixed footer */
+    /* Adjusted padding for fixed footer + counter */
+    padding-bottom: 60px;
 }
 
 #main-content.visible {
@@ -129,6 +130,42 @@ body {
     color: #ff00ff;
     text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
 }
+
+/* View Counter Area START (Re-added styles) */
+#view-counter-area {
+    position: fixed;
+    bottom: 35px; /* Position above the footer */
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 50;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px; /* Space between eye and number */
+}
+
+#color-changing-eye { /* ID for the eye */
+    font-size: 0.9rem; /* Adjust size */
+    /* Color change animation */
+    animation: color-change-eye 4s linear infinite alternate; /* Alternate makes it go back and forth */
+}
+
+#visit-count { /* ID for the number */
+    font-size: 0.8rem; /* Adjust size */
+    color: white; /* Kept white for contrast */
+    font-family: 'Courier New', Courier, monospace;
+    min-width: 10px; /* Prevent layout shift while loading */
+}
+
+/* Color Changing Animation for Eye */
+@keyframes color-change-eye {
+    0%   { color: #ff0000; } /* Red */
+    100% { color: #9d00ff; } /* Purple */
+}
+/* View Counter Area END */
+
 
 /* Footer Credit Link */
 .footer-credit {

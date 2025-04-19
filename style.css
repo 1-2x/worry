@@ -60,8 +60,7 @@ body {
     justify-content: center;
     opacity: 0;
     transition: opacity 1s ease-in;
-    /* Adjusted padding for fixed footer */
-    padding-bottom: 40px;
+    padding-bottom: 40px; /* Padding for fixed footer */
 }
 
 #main-content.visible {
@@ -119,7 +118,6 @@ body {
 
 /* Contact Info */
 .contact-info {
-    /* Adjusted margin to account for footer */
     margin-bottom: 1rem;
 }
 .contact-info p {
@@ -131,12 +129,6 @@ body {
     color: #ff00ff;
     text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
 }
-
-/* View Counter Area CSS REMOVED */
-/* #blinking-eye CSS REMOVED */
-/* #visit-count CSS REMOVED */
-/* @keyframes blink-animation REMOVED */
-
 
 /* Footer Credit Link */
 .footer-credit {

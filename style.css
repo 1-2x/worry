@@ -23,96 +23,48 @@ body {
 
 /* Entry Screen */
 #entry-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-    display: flex;
-    /* Reverted to simple centering */
-    justify-content: center;
-    align-items: center;
-    flex-direction: column; /* Center text if needed */
-    z-index: 100;
-    opacity: 1;
-    transition: opacity 0.5s ease-out;
-    overflow: hidden;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: #000; display: flex; justify-content: center;
+    align-items: center; flex-direction: column; z-index: 100; opacity: 1;
+    transition: opacity 0.5s ease-out; overflow: hidden;
 }
-
-/* Entry Screen Cat Image Style REMOVED */
 
 #entry-screen p {
-     font-size: 1.5em;
-     color: #eee;
-     text-shadow: none;
-     position: static;
-     animation: none;
-     margin-top: 0; /* Reset margin if needed */
+     font-size: 1.5em; color: #eee; text-shadow: none; position: static;
+     animation: none; margin-top: 0;
 }
 
-#entry-screen.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
+#entry-screen.hidden { opacity: 0; pointer-events: none; }
 
 /* Main Content Area */
 #main-content {
-    display: none;
-    text-align: center;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 1s ease-in;
-    padding-bottom: 60px;
-    position: relative;
+    display: none; text-align: center; flex-direction: column;
+    align-items: center; justify-content: center; opacity: 0;
+    transition: opacity 1s ease-in; padding-bottom: 60px; position: relative;
 }
 
-#main-content.visible {
-    display: flex;
-    opacity: 1;
-}
+#main-content.visible { display: flex; opacity: 1; }
 
 /* Title Styling (ASCII Art) */
 .faith-title {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 0.9rem;
-    line-height: 1.0;
-    margin-bottom: 1.5rem;
-    font-weight: normal;
-    text-align: center;
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-    color: #ff00ff;
-    text-shadow: 0 0 6px #ff00ff, 0 0 10px #ff00ff;
-    animation: none;
+    font-family: 'Courier New', Courier, monospace; font-size: 0.9rem;
+    line-height: 1.0; margin-bottom: 1.5rem; font-weight: normal;
+    text-align: center; width: fit-content; margin-left: auto; margin-right: auto;
+    color: #ff00ff; text-shadow: 0 0 6px #ff00ff, 0 0 10px #ff00ff;
+    animation: none; white-space: pre;
 }
 
 /* Icon Links */
-.icon-links {
-    margin-bottom: 2rem;
-    position: relative;
-}
+.icon-links { margin-bottom: 2rem; position: relative; }
 
 .icon-links a.icon-link {
-    color: #ff00ff;
-    text-decoration: none;
-    font-size: 2rem;
-    margin: 0 0.75rem;
-    transition: color 0.3s, text-shadow 0.3s;
-    text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff;
-    animation: color-change-icons 6s linear infinite;
-    display: inline-block;
+    color: #ff00ff; text-decoration: none; font-size: 2rem; margin: 0 0.75rem;
+    transition: color 0.3s, text-shadow 0.3s; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff;
+    animation: color-change-icons 6s linear infinite; display: inline-block;
 }
-.icon-links a#discord-pop-trigger {
-     animation: color-change-icons 6s linear infinite;
-}
+.icon-links a.popup-trigger { /* Style popup triggers distinctly if needed */ }
 
-.icon-links a i {
-    display: block;
-}
+.icon-links a i { display: block; }
 
 @keyframes color-change-icons {
     0%   { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; }
@@ -121,260 +73,71 @@ body {
     100% { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; }
 }
 
-.icon-links a:hover {
-    color: #fff;
-    text-shadow: 0 0 6px #ff00ff, 0 0 12px #ff00ff, 0 0 18px #ff00ff;
-}
+.icon-links a:hover { color: #fff; text-shadow: 0 0 6px #ff00ff, 0 0 12px #ff00ff, 0 0 18px #ff00ff; }
 
-/* Discord Popup */
+/* General Popup Menu Styles */
 .popup-menu {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(10, 0, 20, 0.9);
-    border: 2px solid #9d00ff;
+    position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    background-color: rgba(10, 0, 20, 0.9); border: 2px solid #9d00ff;
     box-shadow: 0 0 10px #9d00ff, 0 0 20px #9d00ff, inset 0 0 5px rgba(157, 0, 255, 0.5);
-    padding: 15px 20px;
-    border-radius: 8px;
-    z-index: 1050;
-    margin-top: 15px;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    padding: 15px 20px; border-radius: 8px; z-index: 1050; margin-top: 15px;
+    opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
     min-width: 250px;
 }
+.popup-menu.visible { opacity: 1; visibility: visible; }
 
-.popup-menu.visible {
-    opacity: 1;
-    visibility: visible;
-}
+/* Styles specific to rows within any popup */
+.popup-row { display: flex; align-items: center; margin-bottom: 12px; }
+.popup-row:last-child { margin-bottom: 0; }
 
-.popup-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 12px;
-}
-.popup-row:last-child {
-    margin-bottom: 0;
-}
+/* Discord Popup Specifics */
+.popup-discord-link { margin-right: 10px; display: inline-block; line-height: 1; }
+.popup-discord-icon { color: #bbb; font-size: 1.2rem; transition: color 0.2s ease; }
+.popup-discord-link:hover .popup-discord-icon { color: #7289da; }
 
-.popup-discord-link {
-    margin-right: 10px;
-    display: inline-block;
-    line-height: 1;
-}
+/* TikTok Popup Specifics */
+.popup-tiktok-link { margin-right: 10px; display: inline-block; line-height: 1; }
+.popup-tiktok-icon { color: #bbb; font-size: 1.2rem; transition: color 0.2s ease; }
+.popup-tiktok-link:hover .popup-tiktok-icon { color: #EE1D52; } /* TikTok color */
 
-.popup-discord-icon {
-    color: #bbb;
-    font-size: 1.2rem;
-    transition: color 0.2s ease;
-}
-.popup-discord-link:hover .popup-discord-icon {
-     color: #7289da;
-}
-
-.popup-text {
-    font-size: 0.9rem;
-    font-family: 'Courier New', Courier, monospace;
-}
+/* Shared text style within popups */
+.popup-text { font-size: 0.9rem; font-family: 'Courier New', Courier, monospace; }
 
 /* Multicolor Neon Text */
-.multicolor-neon span {
-    display: inline-block;
-    animation: multicolor-letter-glow 5s linear infinite;
-    text-shadow: 0 0 2px currentColor, 0 0 4px currentColor;
-}
-.multicolor-neon span:nth-child(1) { animation-delay: 0.0s; }
-.multicolor-neon span:nth-child(2) { animation-delay: 0.2s; }
-.multicolor-neon span:nth-child(3) { animation-delay: 0.4s; }
-.multicolor-neon span:nth-child(4) { animation-delay: 0.6s; }
-.multicolor-neon span:nth-child(5) { animation-delay: 0.8s; }
-.multicolor-neon span:nth-child(6) { animation-delay: 1.0s; }
-.multicolor-neon span:nth-child(7) { animation-delay: 1.2s; }
-
-@keyframes multicolor-letter-glow {
-    0%   { color: #ff0000; } 20%  { color: #9d00ff; } 40%  { color: #0000ff; }
-    60%  { color: #ff00ff; } 80%  { color: #00ffff; } 100% { color: #ff0000; }
-}
-
+.multicolor-neon span { display: inline-block; animation: multicolor-letter-glow 5s linear infinite; text-shadow: 0 0 2px currentColor, 0 0 4px currentColor; }
+.multicolor-neon span:nth-child(1) { animation-delay: 0.0s; } .multicolor-neon span:nth-child(2) { animation-delay: 0.2s; } .multicolor-neon span:nth-child(3) { animation-delay: 0.4s; }
+.multicolor-neon span:nth-child(4) { animation-delay: 0.6s; } .multicolor-neon span:nth-child(5) { animation-delay: 0.8s; } .multicolor-neon span:nth-child(6) { animation-delay: 1.0s; }
+.multicolor-neon span:nth-child(7) { animation-delay: 1.2s; } /* Add more if needed */
+@keyframes multicolor-letter-glow { 0% { color: #ff0000; } 20% { color: #9d00ff; } 40% { color: #0000ff; } 60% { color: #ff00ff; } 80% { color: #00ffff; } 100% { color: #ff0000; } }
 
 /* Fake View Counter Area */
-#view-counter-area {
-    position: fixed;
-    bottom: 35px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    z-index: 50;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-}
-
-#color-changing-eye {
-    font-size: 0.9rem;
-    animation: color-change-eye 4s linear infinite alternate;
-}
-
-#visit-count {
-    font-size: 0.8rem;
-    color: white;
-    font-family: 'Courier New', Courier, monospace;
-    min-width: 10px;
-}
-
-@keyframes color-change-eye {
-    0%   { color: #ff0000; } 100% { color: #9d00ff; }
-}
-
+#view-counter-area { position: fixed; bottom: 35px; left: 0; right: 0; text-align: center; z-index: 50; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; }
+#color-changing-eye { font-size: 0.9rem; animation: color-change-eye 4s linear infinite alternate; }
+#visit-count { font-size: 0.8rem; color: white; font-family: 'Courier New', Courier, monospace; min-width: 10px; }
+@keyframes color-change-eye { 0% { color: #ff0000; } 100% { color: #9d00ff; } }
 
 /* Footer Credit Link */
-.footer-credit {
-    position: fixed;
-    bottom: 10px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    z-index: 50;
-    display: block;
-    font-size: 0.7rem;
-    color: #ff00ff;
-    text-shadow: 0 0 3px #ff00ff;
-    text-decoration: none;
-    transition: color 0.3s, text-shadow 0.3s;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-}
-
-.footer-credit:hover {
-    color: #fff;
-    text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
-}
+.footer-credit { position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; z-index: 50; display: block; font-size: 0.7rem; color: #ff00ff; text-shadow: 0 0 3px #ff00ff; text-decoration: none; transition: color 0.3s, text-shadow 0.3s; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
+.footer-credit:hover { color: #fff; text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff; }
 
 /* --- Volume Control --- */
-#volume-control-container {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    background-color: rgba(40, 30, 50, 0.6);
-    border-radius: 25px;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    z-index: 1100;
-    backdrop-filter: blur(3px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.9s;
-}
-#volume-control-container.visible {
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.5s;
-}
-
-#volume-control-container:hover {
-    background-color: rgba(50, 40, 60, 0.8);
-    padding: 5px 10px;
-}
-
-#mute-button {
-    background: none; border: none; color: #eee;
-    padding: 5px 8px 5px 5px; margin: 0; line-height: 1;
-}
-
-#volume-icon {
-    font-size: 1.1rem; vertical-align: middle; transition: color 0.2s ease;
-}
+#volume-control-container { position: fixed; top: 15px; left: 15px; background-color: rgba(40, 30, 50, 0.6); border-radius: 25px; padding: 5px; display: flex; align-items: center; z-index: 1100; backdrop-filter: blur(3px); border: 1px solid rgba(255, 255, 255, 0.1); opacity: 0; visibility: hidden; transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.9s; }
+#volume-control-container.visible { opacity: 1; visibility: visible; transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.5s; }
+#volume-control-container:hover { background-color: rgba(50, 40, 60, 0.8); padding: 5px 10px; }
+#mute-button { background: none; border: none; color: #eee; padding: 5px 8px 5px 5px; margin: 0; line-height: 1; }
+#volume-icon { font-size: 1.1rem; vertical-align: middle; transition: color 0.2s ease; }
 #mute-button:hover #volume-icon { color: #ff00ff; }
-
-#volume-slider {
-    width: 0; opacity: 0; visibility: hidden;
-    transition: width 0.3s ease, opacity 0.3s ease 0.1s, visibility 0s linear 0.3s;
-    margin-left: 0; height: 8px; vertical-align: middle;
-    appearance: none; -webkit-appearance: none; background: transparent;
-}
-
-#volume-control-container:hover #volume-slider {
-    width: 100px; opacity: 1; visibility: visible; margin-left: 8px;
-    transition: width 0.3s ease, opacity 0.3s ease, visibility 0s linear 0s;
-}
-#volume-slider::-webkit-slider-runnable-track {
-    width: 100%; height: 6px;
-    background: linear-gradient(to right, #ff00ff, #9d00ff);
-    border-radius: 3px; border: 1px solid rgba(0, 0, 0, 0.3);
-}
-#volume-slider::-moz-range-track {
-    width: 100%; height: 6px;
-    background: linear-gradient(to right, #ff00ff, #9d00ff);
-    border-radius: 3px; border: 1px solid rgba(0, 0, 0, 0.3);
-}
-#volume-slider::-webkit-slider-thumb {
-    appearance: none; -webkit-appearance: none; margin-top: -5px;
-    height: 16px; width: 16px; background: #ffffff;
-    border-radius: 50%; border: 1px solid #555; box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-}
-#volume-slider::-moz-range-thumb {
-    height: 14px; width: 14px; background: #ffffff;
-    border-radius: 50%; border: 1px solid #555; box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-}
-
+#volume-slider { width: 0; opacity: 0; visibility: hidden; transition: width 0.3s ease, opacity 0.3s ease 0.1s, visibility 0s linear 0.3s; margin-left: 0; height: 8px; vertical-align: middle; appearance: none; -webkit-appearance: none; background: transparent; }
+#volume-control-container:hover #volume-slider { width: 100px; opacity: 1; visibility: visible; margin-left: 8px; transition: width 0.3s ease, opacity 0.3s ease, visibility 0s linear 0s; }
+#volume-slider::-webkit-slider-runnable-track { width: 100%; height: 6px; background: linear-gradient(to right, #ff00ff, #9d00ff); border-radius: 3px; border: 1px solid rgba(0, 0, 0, 0.3); }
+#volume-slider::-moz-range-track { width: 100%; height: 6px; background: linear-gradient(to right, #ff00ff, #9d00ff); border-radius: 3px; border: 1px solid rgba(0, 0, 0, 0.3); }
+#volume-slider::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; margin-top: -5px; height: 16px; width: 16px; background: #ffffff; border-radius: 50%; border: 1px solid #555; box-shadow: 0 0 3px rgba(0, 0, 0, 0.5); }
+#volume-slider::-moz-range-thumb { height: 14px; width: 14px; background: #ffffff; border-radius: 50%; border: 1px solid #555; box-shadow: 0 0 3px rgba(0, 0, 0, 0.5); }
 
 /* --- Custom Cursor --- */
-#custom-cursor {
-    position: fixed;
-    pointer-events: none;
-    z-index: 9999;
-    left: -100px;
-    top: -100px;
-    font-size: 2rem;
-    line-height: 1;
-    text-align: center;
-    background-color: transparent;
-    animation: cursor-color-change-text 4s linear infinite;
-    width: auto;
-    height: auto;
-    transform: translate(-50%, -50%); /* Centered */
-}
+#custom-cursor { position: fixed; pointer-events: none; z-index: 9999; left: -100px; top: -100px; font-size: 2rem; line-height: 1; text-align: center; background-color: transparent; animation: cursor-color-change-text 4s linear infinite; width: auto; height: auto; transform: translate(-50%, -50%); }
+#custom-cursor::before, #custom-cursor::after { content: none; }
+@keyframes cursor-color-change-text { 0% { color: #ff00ff; } 33% { color: #9d00ff; } 66% { color: #ff0033; } 100% { color: #ff00ff; } }
 
-#custom-cursor::before,
-#custom-cursor::after {
-    content: none;
-}
-
-@keyframes cursor-color-change-text {
-    0%   { color: #ff00ff; } 33%  { color: #9d00ff; } 66%  { color: #ff0033; } 100% { color: #ff00ff; }
-}
-
-/* Cursor Trail REMOVED */
-/* .trail-dot REMOVED */
-/* @keyframes cursor-color-change-trail REMOVED */
-/* @keyframes fade-out REMOVED */
-
-
-/* --- Follower Cat START --- */
-#follower-cat {
-    position: fixed;
-    width: 24px; /* Adjust size as needed */
-    height: 24px;
-    background-image: url('follower-cat.png'); /* Make sure this file exists! */
-    background-size: contain;
-    background-repeat: no-repeat;
-    z-index: 9998; /* Below main cursor */
-    pointer-events: none;
-    /* Start off-screen */
-    left: -50px;
-    top: -50px;
-    /* Added for rotation */
-    transform-origin: center center;
-    /* Transition might make rotation jerky with requestAnimationFrame, remove if needed */
-    /* transition: transform 0.1s linear; */
-    will-change: transform, left, top; /* Performance hint */
-}
-/* --- Follower Cat END --- */
+/* Trail Cat CSS REMOVED */
+/* @keyframes fade-out-cat REMOVED */

@@ -1,7 +1,6 @@
 /* General Styles */
 body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; cursor: none !important; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
 * { cursor: none !important; }
-/* Drawing Canvas Style REMOVED */
 
 /* Entry Screen */
 #entry-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 100; opacity: 1; transition: opacity 0.5s ease-out; overflow: hidden; }
@@ -9,7 +8,7 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 #entry-screen.hidden { opacity: 0; pointer-events: none; }
 
 /* Main Content Area */
-#main-content { display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease-in; padding-bottom: 40px; /* Space for view counter */ position: relative; perspective: 1000px; }
+#main-content { display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease-in; padding-bottom: 40px; position: relative; perspective: 1000px; }
 #main-content.visible { display: flex; opacity: 1; }
 
 /* Location Indicator */
@@ -20,20 +19,26 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 #location-text span:not(#typing-cursor) { display: inline-block; animation: location-letter-glow 3s linear infinite; text-shadow: 0 0 4px currentColor, 0 0 8px currentColor; color: #eee; }
 #location-text span:nth-child(1):not(#typing-cursor) { animation-delay: 0.0s; } #location-text span:nth-child(2):not(#typing-cursor) { animation-delay: -0.3s; } #location-text span:nth-child(3):not(#typing-cursor) { animation-delay: -0.6s; } #location-text span:nth-child(4):not(#typing-cursor) { animation-delay: -0.9s; } #location-text span:nth-child(5):not(#typing-cursor) { animation-delay: -1.2s; } #location-text span:nth-child(6):not(#typing-cursor) { animation-delay: -1.5s; } #location-text span:nth-child(7):not(#typing-cursor) { animation-delay: -1.8s; } #location-text span:nth-child(8):not(#typing-cursor) { animation-delay: -2.1s; } #location-text span:nth-child(9):not(#typing-cursor) { animation-delay: -2.4s; } #location-text span:nth-child(10):not(#typing-cursor){ animation-delay: -2.7s; }
 @keyframes location-letter-glow { 0%, 100% { color: #ff00ff; } 50% { color: #9d00ff; } } /* Pink <-> Purple */
-#typing-cursor { display: inline-block; width: 2px; height: 1.1em; margin-left: 2px; vertical-align: text-bottom; animation: location-letter-glow 3s linear infinite -3.0s, blink-caret 1s step-end infinite; text-shadow: 0 0 4px currentColor, 0 0 8px currentColor; } /* Inherits color animation */
-@keyframes blink-caret { from, to { opacity: 1; } 50% { opacity: 0; } } /* Opacity blink */
+#typing-cursor { display: inline-block; width: 2px; height: 1.1em; margin-left: 2px; vertical-align: text-bottom; animation: location-letter-glow 3s linear infinite -3.0s, blink-caret 1s step-end infinite; text-shadow: 0 0 4px currentColor, 0 0 8px currentColor; }
+@keyframes blink-caret { from, to { opacity: 1; } 50% { opacity: 0; } }
 
 /* Title Styling (>_<) */
-.faith-title { /* Reusing class, now for >_< */
+.faith-title {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 5rem; /* Much larger for text */
+    font-size: 5rem; /* Larger size */
     line-height: 1.0; margin-bottom: 1.5rem; font-weight: bold;
     text-align: center; width: fit-content; margin-left: auto; margin-right: auto;
     color: #ff00ff; /* Base neon pink */
     /* Stronger neon glow */
-    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ff00ff, 0 0 20px #ff00ff, 0 0 25px #ff00ff, 0 0 30px #ff00ff, 0 0 35px #ff00ff;
-    animation: none; /* Remove previous animations */
-    white-space: pre; /* Keep if needed, might not be for simple text */
+    text-shadow: 0 0 5px rgba(255,255,255,0.8), /* Inner white */
+                 0 0 10px rgba(255,255,255,0.6),
+                 0 0 15px #ff00ff, /* Pink glow */
+                 0 0 25px #ff00ff,
+                 0 0 35px #ff00ff,
+                 0 0 45px #da00ff, /* Purple outer glow */
+                 0 0 55px #da00ff;
+    animation: none;
+    white-space: pre;
 }
 
 
@@ -58,23 +63,22 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 .multicolor-neon span { display: inline-block; animation: multicolor-letter-glow 5s linear infinite; text-shadow: 0 0 2px currentColor, 0 0 4px currentColor; }
 .multicolor-neon span:nth-child(1) { animation-delay: 0.0s; } .multicolor-neon span:nth-child(2) { animation-delay: 0.2s; } .multicolor-neon span:nth-child(3) { animation-delay: 0.4s; } .multicolor-neon span:nth-child(4) { animation-delay: 0.6s; } .multicolor-neon span:nth-child(5) { animation-delay: 0.8s; } .multicolor-neon span:nth-child(6) { animation-delay: 1.0s; } .multicolor-neon span:nth-child(7) { animation-delay: 1.2s; } .multicolor-neon span:nth-child(8) { animation-delay: 1.4s; } .multicolor-neon span:nth-child(9) { animation-delay: 1.6s; }
 @keyframes multicolor-letter-glow { 0% { color: #ff0000; } 20% { color: #9d00ff; } 40% { color: #0000ff; } 60% { color: #ff00ff; } 80% { color: #00ffff; } 100% { color: #ff0000; } }
-/* Username Hover Flash Effect REMOVED */
+/* Username Hover Flash REMOVED */
 
 /* Fake View Counter Area */
 #view-counter-area { position: fixed; bottom: 10px; /* At the bottom */ left: 0; right: 0; text-align: center; z-index: 50; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; }
 #color-changing-eye { font-size: 0.9rem; animation: color-change-eye 4s linear infinite alternate; }
-#visit-count { font-size: 0.8rem; color: white; font-family: 'Courier New', Courier, monospace; min-width: 10px; animation: counter-color-change 5s linear infinite alternate; text-shadow: 0 0 3px currentColor, 0 0 6px currentColor; } /* Color changing number */
+#visit-count { font-size: 0.8rem; color: white; font-family: 'Courier New', Courier, monospace; min-width: 10px; animation: counter-color-change 5s linear infinite alternate; text-shadow: 0 0 3px currentColor, 0 0 6px currentColor; } /* Pink/Purple Number */
 @keyframes color-change-eye { 0% { color: #ff0000; } 100% { color: #9d00ff; } }
 @keyframes counter-color-change { 0%, 100% { color: #ff00ff; } 50% { color: #9d00ff; } }
 
 /* Footer Credit Link REMOVED */
-/* ASCII Cat Animation Styles REMOVED */
 
 /* --- Volume Control --- */
 #volume-control-container { position: fixed; top: 15px; left: 15px; background-color: rgba(40, 30, 50, 0.6); border-radius: 25px; padding: 5px; display: flex; align-items: center; z-index: 1100; backdrop-filter: blur(3px); border: 1px solid rgba(255, 255, 255, 0.1); opacity: 0; visibility: hidden; transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.9s; }
 #volume-control-container.visible { opacity: 1; visibility: visible; transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.5s; }
 #volume-control-container:hover { background-color: rgba(50, 40, 60, 0.8); padding: 5px 10px; }
-#mute-button { background: none; border: none; color: #eee; padding: 10px; /* Increased Hitbox */ margin: -5px 0 -5px -5px; line-height: 1; }
+#mute-button { background: none; border: none; color: #eee; padding: 10px; margin: -5px 0 -5px -5px; /* Increased Hitbox */ line-height: 1; }
 #volume-icon { font-size: 1.1rem; vertical-align: middle; transition: color 0.2s ease; }
 #mute-button:hover #volume-icon { color: #ff00ff; }
 #volume-slider { width: 0; opacity: 0; visibility: hidden; transition: width 0.3s ease, opacity 0.3s ease 0.1s, visibility 0s linear 0.3s; margin-left: 0; height: 8px; vertical-align: middle; appearance: none; -webkit-appearance: none; background: transparent; padding-top: 5px; padding-bottom: 5px; margin-top: -5px; margin-bottom: -5px; } /* Hitbox attempt */
@@ -85,20 +89,11 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 #volume-slider::-moz-range-thumb { height: 14px; width: 14px; background: #ffffff; border-radius: 50%; border: 1px solid #555; box-shadow: 0 0 3px rgba(0, 0, 0, 0.5); }
 
 /* --- Custom Cursor (CSS Heart) --- */
-#custom-cursor { position: fixed; width: 15px; height: 15px; pointer-events: none; z-index: 9999; left: -100px; top: -100px; transform: rotate(-45deg); background-color: transparent; }
+#custom-cursor { position: fixed; width: 15px; height: 15px; pointer-events: none; z-index: 9999; left: -100px; top: -100px; transform: rotate(-45deg) translate(-50%, -50%); /* Combined transforms for centering */ background-color: transparent; }
 #custom-cursor::before, #custom-cursor::after { content: ''; position: absolute; width: 15px; height: 15px; border-radius: 50%; animation: cursor-heart-color-change 4s linear infinite; }
 #custom-cursor::before { top: -7px; left: 0; }
 #custom-cursor::after { top: 0; left: 7px; }
 @keyframes cursor-heart-color-change { 0% { background-color: #ff00ff; } 33% { background-color: #9d00ff; } 66% { background-color: #ff0033; } 100% { background-color: #ff00ff; } }
 
 /* --- Falling Heart Trail START --- */
-.trail-heart { position: fixed; width: 15px; height: 15px; pointer-events: none; z-index: 9998; opacity: 0.9; transform-origin: center center; transform: translate(-50%, -50%) rotate(-45deg); animation: fall-and-fade 1.0s linear forwards; /* Faster fall */ } /* Using CSS heart shape */
-.trail-heart::before, .trail-heart::after { content: ''; position: absolute; width: 15px; height: 15px; border-radius: 50%; animation: cursor-heart-color-change 4s linear infinite; /* Match cursor color */ }
-.trail-heart::before { top: -7px; left: 0; }
-.trail-heart::after { top: 0; left: 7px; }
-
-@keyframes fall-and-fade { /* Adjusted fall distance */
-    0% { opacity: 0.9; transform: translate(-50%, -50%) rotate(-45deg) translateY(0px) scale(1); }
-    100% { opacity: 0; transform: translate(-50%, -50%) rotate(-45deg) translateY(40vh) scale(0.5); } /* Fall less distance */
-}
-/* --- Falling Heart Trail END --- */
+.trail-heart { position: fixed; width: 15px; height: 15px; pointer-events: none

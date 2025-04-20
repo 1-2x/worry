@@ -8,11 +8,11 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 #entry-screen.hidden { opacity: 0; pointer-events: none; }
 
 /* Main Content Area */
-#main-content { display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease-in; padding-bottom: 40px; position: relative; perspective: 1000px; }
+#main-content { display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease-in; padding-bottom: 40px; position: relative; perspective: 1000px; z-index: 10; /* Ensure main content is above charts if needed */ }
 #main-content.visible { display: flex; opacity: 1; }
 
 /* Location Indicator */
-#location-indicator { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; font-size: 1rem; position: relative; z-index: 10;}
+#location-indicator { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; font-size: 1rem; }
 #location-indicator i { font-size: 1.1em; animation: location-color-change-cyan 1.5s linear infinite alternate; }
 @keyframes location-color-change-cyan { 0% { color: #00ffff; } 100% { color: #9d00ff; } }
 #location-text { min-height: 1.2em; font-weight: bold; font-size: 1.1em; }
@@ -31,8 +31,8 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 #typing-cursor { display: inline-block; width: 2px; height: 1.1em; margin-left: 2px; vertical-align: text-bottom; animation: location-letter-glow 3s linear infinite -3.0s, blink-caret 1s step-end infinite; text-shadow: 0 0 4px currentColor, 0 0 8px currentColor; }
 @keyframes blink-caret { from, to { opacity: 1; } 50% { opacity: 0; } }
 
-/* Title Styling (ASCII Art - Worry) */
-.faith-title { /* Restored styles for ASCII */
+/* Title Styling (ASCII Art - Worry - Restored) */
+.faith-title {
     font-family: 'Courier New', Courier, monospace;
     font-size: 0.9rem;
     line-height: 1.0;
@@ -46,13 +46,10 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
     text-shadow: 0 0 6px #ff00ff, 0 0 10px #ff00ff;
     animation: none;
     white-space: pre;
-    position: relative; /* Keep it in flow */
-    z-index: 10; /* Ensure it's above charts if they overlap slightly */
 }
 
-
 /* Icon Links */
-.icon-links { margin-bottom: 2rem; position: relative; z-index: 10;}
+.icon-links { margin-bottom: 2rem; position: relative; }
 .icon-links a.icon-link { color: #ff00ff; text-decoration: none; font-size: 2rem; margin: 0 0.75rem; transition: color 0.3s, text-shadow 0.3s; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; animation: color-change-icons 6s linear infinite; display: inline-block; }
 .icon-links a.popup-trigger { animation: color-change-icons 6s linear infinite; }
 .icon-links a i { display: block; }

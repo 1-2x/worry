@@ -9,8 +9,6 @@
 </head>
 <body>
     <div id="custom-cursor"></div>
-    <div id="follower-cat"></div>
-
     <div id="entry-screen">
         <p>Click to Enter</p>
     </div>
@@ -24,34 +22,69 @@
                          |___/  </pre>
 
         <div class="icon-links">
-            <a href="https://github.com/djbi" aria-label="GitHub Profile" target="_blank" class="icon-link double-clickable"><i class="fa-brands fa-github"></i></a>
-            <a href="https://www.tiktok.com/@worry.rip" aria-label="TikTok Profile" target="_blank" class="icon-link double-clickable"><i class="fa-brands fa-tiktok"></i></a>
-            <a href="#" aria-label="Discord Menu" id="discord-pop-trigger" class="icon-link"><i class="fa-brands fa-discord"></i></a>
-            <a href="http://supercell.us.com" aria-label="Supercell Link" target="_blank" class="icon-link double-clickable"><i class="fa-solid fa-code"></i></a>
-            <a href="http://brawlstars.us.com" aria-label="Brawl Stars Link" target="_blank" class="icon-link double-clickable"><i class="fa-solid fa-gamepad"></i></a>
-            </div>
+            <a href="#" aria-label="GitHub Menu" id="github-pop-trigger" data-popup-target="github-popup" class="icon-link popup-trigger">
+                <i class="fa-brands fa-github"></i>
+            </a>
+            <a href="#" aria-label="TikTok Menu" id="tiktok-pop-trigger" data-popup-target="tiktok-popup" class="icon-link popup-trigger">
+                <i class="fa-brands fa-tiktok"></i>
+            </a>
+             <a href="#" aria-label="Discord Menu" id="discord-pop-trigger" data-popup-target="discord-popup" class="icon-link popup-trigger">
+                <i class="fa-brands fa-discord"></i>
+            </a>
+             <a href="http://supercell.us.com" aria-label="Supercell Link" target="_blank" rel="noopener noreferrer" class="icon-link double-clickable">
+                 <i class="fa-solid fa-code"></i>
+            </a>
+             <a href="http://brawlstars.us.com" aria-label="Brawl Stars Link" target="_blank" rel="noopener noreferrer" class="icon-link double-clickable">
+                 <i class="fa-solid fa-gamepad"></i>
+            </a>
+        </div>
 
-         <div id="discord-popup" class="popup-menu hidden">
-             <div class="popup-row">
-                 <a href="https://discord.com/users/1265799421417754664" target="_blank" class="popup-discord-link" aria-label="Discord User 1"><i class="fab fa-discord popup-discord-icon"></i></a>
-                 <span class="popup-text multicolor-neon"><span>w</span><span>r</span><span>y</span><span>.</span><span>r</span><span>i</span><span>p</span></span>
+         <div id="github-popup" class="popup-menu hidden">
+             <p style="color:#ccc; font-size: 0.9em;">GitHub Info Placeholder</p>
              </div>
+
+         <div id="tiktok-popup" class="popup-menu hidden">
              <div class="popup-row">
-                 <a href="https://discord.com/users/397485438631411712" target="_blank" class="popup-discord-link" aria-label="Discord User 2"><i class="fab fa-discord popup-discord-icon"></i></a>
-                 <span class="popup-text multicolor-neon"><span>y</span><span>b</span><span>c</span><span>a</span><span>n</span><span>d</span><span>y</span></span>
+                 <a href="https://www.tiktok.com/@expertsly" target="_blank" rel="noopener noreferrer" class="popup-tiktok-link" aria-label="TikTok User 1"><i class="fab fa-tiktok popup-tiktok-icon"></i></a>
+                 <span class="popup-text multicolor-neon">
+                     <span>e</span><span>x</span><span>p</span><span>e</span><span>r</span><span>t</span><span>s</span><span>l</span><span>y</span>
+                 </span>
              </div>
-             <div class="popup-row">
-                 <a href="https://discord.com/users/1202318974109614111" target="_blank" class="popup-discord-link" aria-label="Discord User 3"><i class="fab fa-discord popup-discord-icon"></i></a>
-                  <span class="popup-text multicolor-neon"><span>z</span><span>v</span><span>z</span><span>h</span></span>
+              <div class="popup-row">
+                 <a href="https://www.tiktok.com/@worry.rip" target="_blank" rel="noopener noreferrer" class="popup-tiktok-link" aria-label="TikTok User 2"><i class="fab fa-tiktok popup-tiktok-icon"></i></a>
+                 <span class="popup-text multicolor-neon">
+                     <span>w</span><span>o</span><span>r</span><span>r</span><span>y</span><span>.</span><span>r</span><span>i</span><span>p</span>
+                 </span>
              </div>
          </div>
+
+         <div id="discord-popup" class="popup-menu hidden">
+            <div class="popup-row">
+                <a href="https://discord.com/users/1265799421417754664" target="_blank" rel="noopener noreferrer" class="popup-discord-link" aria-label="Discord User 1"><i class="fab fa-discord popup-discord-icon"></i></a>
+                <span class="popup-text multicolor-neon">
+                    <span>w</span><span>r</span><span>y</span><span>.</span><span>r</span><span>i</span><span>p</span>
+                </span>
+            </div>
+            <div class="popup-row">
+                <a href="https://discord.com/users/397485438631411712" target="_blank" rel="noopener noreferrer" class="popup-discord-link" aria-label="Discord User 2"><i class="fab fa-discord popup-discord-icon"></i></a>
+                <span class="popup-text multicolor-neon">
+                    <span>y</span><span>b</span><span>c</span><span>a</span><span>n</span><span>d</span><span>y</span>
+                </span>
+            </div>
+            <div class="popup-row">
+                <a href="https://discord.com/users/1202318974109614111" target="_blank" rel="noopener noreferrer" class="popup-discord-link" aria-label="Discord User 3"><i class="fab fa-discord popup-discord-icon"></i></a>
+                 <span class="popup-text multicolor-neon">
+                    <span>z</span><span>v</span><span>z</span><span>h</span>
+                </span>
+            </div>
+        </div>
 
         <div id="view-counter-area">
             <i class="fa-solid fa-eye" id="color-changing-eye"></i>
             <span id="visit-count">0</span>
         </div>
 
-        <a href="http://wry.rip" class="footer-credit" target="_blank" aria-label="Inspired by Graham - Link to wry.rip">inspired by graham</a>
+        <a href="http://wry.rip" class="footer-credit" target="_blank" rel="noopener noreferrer" aria-label="Inspired by Graham - Link to wry.rip">inspired by graham</a>
 
     </div>
 

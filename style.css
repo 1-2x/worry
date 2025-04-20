@@ -60,8 +60,8 @@ body {
     justify-content: center;
     opacity: 0;
     transition: opacity 1s ease-in;
-    padding-bottom: 60px; /* Padding for fixed footer + counter */
-    position: relative; /* Needed for positioning the absolute popup */
+    padding-bottom: 60px;
+    position: relative;
 }
 
 #main-content.visible {
@@ -70,9 +70,9 @@ body {
 }
 
 /* Title Styling (ASCII Art) */
-.faith-title { /* Class name kept, applies to 'WAVY' art now */
+.faith-title {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 0.9rem; /* Small size */
+    font-size: 0.9rem;
     line-height: 1.0;
     margin-bottom: 1.5rem;
     font-weight: normal;
@@ -105,7 +105,6 @@ body {
      animation: color-change-icons 6s linear infinite;
 }
 
-
 .icon-links a i {
     display: block;
 }
@@ -122,7 +121,7 @@ body {
     text-shadow: 0 0 6px #ff00ff, 0 0 12px #ff00ff, 0 0 18px #ff00ff;
 }
 
-/* Discord Popup START */
+/* Discord Popup */
 .popup-menu {
     position: absolute;
     top: 100%;
@@ -181,7 +180,6 @@ body {
     animation: multicolor-letter-glow 5s linear infinite;
     text-shadow: 0 0 2px currentColor, 0 0 4px currentColor;
 }
-
 .multicolor-neon span:nth-child(1) { animation-delay: 0.0s; }
 .multicolor-neon span:nth-child(2) { animation-delay: 0.2s; }
 .multicolor-neon span:nth-child(3) { animation-delay: 0.4s; }
@@ -190,18 +188,12 @@ body {
 .multicolor-neon span:nth-child(6) { animation-delay: 1.0s; }
 .multicolor-neon span:nth-child(7) { animation-delay: 1.2s; }
 
-@keyframes multicolor-letter-glow { /* Red -> Purple -> Dark Blue -> Pink -> Cyan -> Red */
-    0%   { color: #ff0000; }
-    20%  { color: #9d00ff; }
-    40%  { color: #0000ff; }
-    60%  { color: #ff00ff; }
-    80%  { color: #00ffff; }
-    100% { color: #ff0000; }
+@keyframes multicolor-letter-glow {
+    0%   { color: #ff0000; } 20%  { color: #9d00ff; } 40%  { color: #0000ff; }
+    60%  { color: #ff00ff; } 80%  { color: #00ffff; } 100% { color: #ff0000; }
 }
-/* Discord Popup END */
 
-
-/* Fake View Counter Area START */
+/* Fake View Counter Area */
 #view-counter-area {
     position: fixed;
     bottom: 35px;
@@ -228,12 +220,9 @@ body {
     min-width: 10px;
 }
 
-/* Color Changing Animation for Eye */
 @keyframes color-change-eye {
-    0%   { color: #ff0000; } /* Red */
-    100% { color: #9d00ff; } /* Purple */
+    0%   { color: #ff0000; } 100% { color: #9d00ff; }
 }
-/* Fake View Counter Area END */
 
 
 /* Footer Credit Link */
@@ -260,6 +249,108 @@ body {
     color: #fff;
     text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
 }
+
+/* --- Volume Control START --- */
+#volume-control-container {
+    position: fixed;
+    bottom: 15px; /* Adjust to not overlap footer */
+    right: 15px;
+    background-color: rgba(40, 30, 50, 0.6); /* Slightly transparent dark purple */
+    border-radius: 25px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    z-index: 1100;
+    transition: background-color 0.3s ease, padding 0.3s ease;
+    backdrop-filter: blur(3px); /* Optional: frosted glass effect */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#volume-control-container:hover {
+    background-color: rgba(50, 40, 60, 0.8);
+    padding: 5px 10px; /* Expand padding on hover */
+}
+
+#mute-button {
+    background: none;
+    border: none;
+    color: #eee;
+    padding: 5px 8px 5px 5px; /* Adjust padding */
+    margin: 0;
+    line-height: 1;
+    /* cursor: pointer; Already handled by universal none, interaction via JS */
+}
+
+#volume-icon {
+    font-size: 1.1rem; /* Slightly smaller */
+    vertical-align: middle;
+    transition: color 0.2s ease;
+}
+#mute-button:hover #volume-icon {
+    color: #ff00ff; /* Pink hover */
+}
+
+#volume-slider {
+    /* Initially hidden */
+    width: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: width 0.3s ease, opacity 0.3s ease 0.1s, visibility 0s linear 0.3s; /* Delay opacity/visibility */
+    margin-left: 0;
+    height: 8px; /* Slider height */
+    vertical-align: middle;
+    /* cursor: pointer; Already handled by universal none, interaction via JS */
+    appearance: none; /* Override default look */
+    -webkit-appearance: none;
+    background: transparent; /* Hide default track */
+}
+
+#volume-control-container:hover #volume-slider {
+    width: 100px; /* Width when revealed */
+    opacity: 1;
+    visibility: visible;
+    margin-left: 8px; /* Space between button and slider */
+    transition: width 0.3s ease, opacity 0.3s ease, visibility 0s linear 0s; /* Adjust transition for reveal */
+}
+
+/* Custom Slider Track */
+#volume-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(to right, #ff00ff, #9d00ff); /* Pink to purple gradient */
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+#volume-slider::-moz-range-track {
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(to right, #ff00ff, #9d00ff);
+    border-radius: 3px;
+     border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+/* Custom Slider Thumb (Handle) */
+#volume-slider::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    margin-top: -5px; /* Center thumb vertically */
+    height: 16px;
+    width: 16px;
+    background: #ffffff;
+    border-radius: 50%;
+    border: 1px solid #555;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+#volume-slider::-moz-range-thumb {
+    height: 14px; /* Adjust size for Firefox */
+    width: 14px;
+    background: #ffffff;
+    border-radius: 50%;
+    border: 1px solid #555;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Volume Control END --- */
 
 
 /* --- Custom Cursor --- */

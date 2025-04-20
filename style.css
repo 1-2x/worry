@@ -18,7 +18,7 @@ body {
 }
 
 * {
-    cursor: none !important;
+    cursor: none !important; /* Hides system cursor everywhere */
 }
 
 /* Entry Screen */
@@ -40,18 +40,50 @@ body {
 #main-content {
     display: none; text-align: center; flex-direction: column;
     align-items: center; justify-content: center; opacity: 0;
-    transition: opacity 1s ease-in; padding-bottom: 60px; position: relative;
+    transition: opacity 1s ease-in;
+    padding-bottom: 50px; /* Reduced padding as footer removed */
+    position: relative;
 }
 
 #main-content.visible { display: flex; opacity: 1; }
 
+/* Location Indicator START */
+#location-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Space between icon and text */
+    margin-bottom: 15px; /* Space above ASCII art */
+    font-size: 1rem; /* Size of text/icon */
+}
+
+#location-indicator i {
+    font-size: 1.1em; /* Slightly larger icon */
+    /* Color animation Red <-> Purple */
+    animation: location-color-change 4s linear infinite alternate;
+}
+
+@keyframes location-color-change {
+     0% { color: #ff0000; } /* Red */
+    100% { color: #9d00ff; } /* Purple */
+}
+
+#location-text {
+    color: #eee; /* White/light grey text */
+    font-family: 'Courier New', Courier, monospace;
+    min-height: 1.2em; /* Prevent layout shift during delete */
+}
+/* Location Indicator END */
+
+
 /* Title Styling (ASCII Art) */
 .faith-title {
-    font-family: 'Courier New', Courier, monospace; font-size: 0.9rem;
-    line-height: 1.0; margin-bottom: 1.5rem; font-weight: normal;
-    text-align: center; width: fit-content; margin-left: auto; margin-right: auto;
-    color: #ff00ff; text-shadow: 0 0 6px #ff00ff, 0 0 10px #ff00ff;
-    animation: none; white-space: pre;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem; line-height: 1.0; margin-bottom: 1.5rem;
+    font-weight: normal; text-align: center; width: fit-content;
+    margin-left: auto; margin-right: auto; color: #ff00ff;
+    text-shadow: 0 0 6px #ff00ff, 0 0 10px #ff00ff; animation: none;
+    white-space: pre;
 }
 
 /* Icon Links */
@@ -62,11 +94,13 @@ body {
     transition: color 0.3s, text-shadow 0.3s; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff;
     animation: color-change-icons 6s linear infinite; display: inline-block;
 }
-.icon-links a.popup-trigger { /* Style popup triggers distinctly if needed */ }
+.icon-links a.popup-trigger { /* This now includes Discord and TikTok */
+     animation: color-change-icons 6s linear infinite;
+}
 
 .icon-links a i { display: block; }
 
-@keyframes color-change-icons {
+@keyframes color-change-icons { /* Shared by icons */
     0%   { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; }
     33%  { color: #00ffff; text-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff; }
     66%  { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; }
@@ -85,10 +119,9 @@ body {
     min-width: 250px;
 }
 .popup-menu.visible { opacity: 1; visibility: visible; }
-
-/* Styles specific to rows within any popup */
 .popup-row { display: flex; align-items: center; margin-bottom: 12px; }
 .popup-row:last-child { margin-bottom: 0; }
+.popup-text { font-size: 0.9rem; font-family: 'Courier New', Courier, monospace; }
 
 /* Discord Popup Specifics */
 .popup-discord-link { margin-right: 10px; display: inline-block; line-height: 1; }
@@ -98,27 +131,23 @@ body {
 /* TikTok Popup Specifics */
 .popup-tiktok-link { margin-right: 10px; display: inline-block; line-height: 1; }
 .popup-tiktok-icon { color: #bbb; font-size: 1.2rem; transition: color 0.2s ease; }
-.popup-tiktok-link:hover .popup-tiktok-icon { color: #EE1D52; } /* TikTok color */
-
-/* Shared text style within popups */
-.popup-text { font-size: 0.9rem; font-family: 'Courier New', Courier, monospace; }
+.popup-tiktok-link:hover .popup-tiktok-icon { color: #EE1D52; }
 
 /* Multicolor Neon Text */
 .multicolor-neon span { display: inline-block; animation: multicolor-letter-glow 5s linear infinite; text-shadow: 0 0 2px currentColor, 0 0 4px currentColor; }
 .multicolor-neon span:nth-child(1) { animation-delay: 0.0s; } .multicolor-neon span:nth-child(2) { animation-delay: 0.2s; } .multicolor-neon span:nth-child(3) { animation-delay: 0.4s; }
 .multicolor-neon span:nth-child(4) { animation-delay: 0.6s; } .multicolor-neon span:nth-child(5) { animation-delay: 0.8s; } .multicolor-neon span:nth-child(6) { animation-delay: 1.0s; }
-.multicolor-neon span:nth-child(7) { animation-delay: 1.2s; } /* Add more if needed */
+.multicolor-neon span:nth-child(7) { animation-delay: 1.2s; } .multicolor-neon span:nth-child(8) { animation-delay: 1.4s; } .multicolor-neon span:nth-child(9) { animation-delay: 1.6s; }
 @keyframes multicolor-letter-glow { 0% { color: #ff0000; } 20% { color: #9d00ff; } 40% { color: #0000ff; } 60% { color: #ff00ff; } 80% { color: #00ffff; } 100% { color: #ff0000; } }
 
 /* Fake View Counter Area */
-#view-counter-area { position: fixed; bottom: 35px; left: 0; right: 0; text-align: center; z-index: 50; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; }
+#view-counter-area { position: fixed; bottom: 15px; /* Moved up slightly */ left: 0; right: 0; text-align: center; z-index: 50; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; }
 #color-changing-eye { font-size: 0.9rem; animation: color-change-eye 4s linear infinite alternate; }
 #visit-count { font-size: 0.8rem; color: white; font-family: 'Courier New', Courier, monospace; min-width: 10px; }
 @keyframes color-change-eye { 0% { color: #ff0000; } 100% { color: #9d00ff; } }
 
-/* Footer Credit Link */
-.footer-credit { position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; z-index: 50; display: block; font-size: 0.7rem; color: #ff00ff; text-shadow: 0 0 3px #ff00ff; text-decoration: none; transition: color 0.3s, text-shadow 0.3s; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
-.footer-credit:hover { color: #fff; text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff; }
+/* Footer Credit Link REMOVED */
+/* .footer-credit rule REMOVED */
 
 /* --- Volume Control --- */
 #volume-control-container { position: fixed; top: 15px; left: 15px; background-color: rgba(40, 30, 50, 0.6); border-radius: 25px; padding: 5px; display: flex; align-items: center; z-index: 1100; backdrop-filter: blur(3px); border: 1px solid rgba(255, 255, 255, 0.1); opacity: 0; visibility: hidden; transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.9s; }
@@ -139,5 +168,6 @@ body {
 #custom-cursor::before, #custom-cursor::after { content: none; }
 @keyframes cursor-color-change-text { 0% { color: #ff00ff; } 33% { color: #9d00ff; } 66% { color: #ff0033; } 100% { color: #ff00ff; } }
 
-/* Trail Cat CSS REMOVED */
+/* --- Trail Cat CSS REMOVED --- */
+/* .trail-cat REMOVED */
 /* @keyframes fade-out-cat REMOVED */

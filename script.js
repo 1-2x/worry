@@ -1,8 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Loaded. Checking for LightweightCharts library...");
-    if (typeof LightweightCharts === 'undefined') { console.error("CRITICAL: LightweightCharts object is UNDEFINED!"); }
-    else { console.log("LightweightCharts object found:", LightweightCharts); }
-
     // --- Standard Elements ---
     const entryScreen = document.getElementById('entry-screen');
     const mainContent = document.getElementById('main-content');
@@ -18,24 +14,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationTextElement = document.getElementById('location-text');
     const typingCursorElement = document.getElementById('typing-cursor');
 
-    // --- Stock Chart Elements & State ---
-    const chartContainerLeft = document.getElementById('chart-container-left');
-    const chartContainerRight = document.getElementById('chart-container-right');
-    console.log("Chart Containers Selected:", chartContainerLeft, chartContainerRight);
-
-    let chartLeft = null; let candleSeriesLeft = null; let chartRight = null; let candleSeriesRight = null;
-    let stockIntervalLeft = null; let stockIntervalRight = null;
-    let currentDataLeft = []; let currentDataRight = [];
-    // Updated chart config for colors and no labels
-    const chartConfig = {
-        candlesToShow: 30, updateInterval: 300, priceMin: 40, priceMax: 100,
-        upColor: '#ee82ee', // Neon Violet
-        downColor: '#9d00ff', // Neon Purple
-        wickUpColor: '#ee82ee',
-        wickDownColor: '#9d00ff',
-        chartBackgroundColor: '#000000', // Black background
-        textColor: 'rgba(0, 0, 0, 0)' // Hidden text/labels
+    // --- Ticker Bar Elements & State ---
+    const tickerContainerLeft = document.getElementById('ticker-container-left');
+    const tickerContainerRight = document.getElementById('ticker-container-right');
+    let tickerIntervalLeft = null;
+    let tickerIntervalRight = null;
+    const tickerConfig = {
+        maxBars: 35, // Roughly fit 150px width ( (4px + 2px)*35)
+        updateInterval: 300, // ~10.5 sec loop (35 * 300ms) - Adjust as needed
+        minHeight: 10, // px
+        maxHeight: 70, // px (relative to container height)
+        upColorClass: 'bar-up', // Violet
+        downColorClass: 'bar-down' // Purple (default)
     };
+    let lastValueLeft = 50; // Simulate previous value for color logic
+    let lastValueRight = 50;
 
     // --- Global State ---
     let visiblePopupForTilt = null; let lastTrailTime = 0; const trailInterval = 50;
@@ -49,53 +42,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationString = "London, UK"; const typeSpeed = 180; const deleteSpeed = 120; const pauseDuration = 2500; let locationCharIndex = 0; let locationIsDeleting = false; let locationLoopTimeout;
     function typeDeleteLoop() { clearTimeout(locationLoopTimeout); const cursor = typingCursorElement; if (!locationTextElement || !cursor) return; if (!locationIsDeleting) { if (locationCharIndex < locationString.length) { const letterSpan = document.createElement('span'); letterSpan.textContent = locationString.charAt(locationCharIndex); locationTextElement.insertBefore(letterSpan, cursor); locationCharIndex++; locationLoopTimeout = setTimeout(typeDeleteLoop, typeSpeed); } else { locationIsDeleting = true; if (cursor) cursor.style.animationPlayState = 'paused'; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration); } } else { const letterSpans = locationTextElement.querySelectorAll('span:not(#typing-cursor)'); if (letterSpans.length > 0) { if (cursor) cursor.style.animationPlayState = 'running'; locationTextElement.removeChild(letterSpans[letterSpans.length - 1]); locationLoopTimeout = setTimeout(typeDeleteLoop, deleteSpeed); } else { locationIsDeleting = false; locationCharIndex = 0; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration / 2); } } }
 
+    // --- Ticker Bar Simulation Logic START ---
+    function updateTicker(container, lastValueState) {
+        if (!container) return;
 
-    // --- Stock Chart Logic START ---
-    // Moved function definitions BEFORE they are called
+        // 1. Generate new bar data
+        const newHeight = Math.random() * (tickerConfig.maxHeight - tickerConfig.minHeight) + tickerConfig.minHeight;
+        const currentValue = newHeight; // Use height as a proxy for value change direction
+        const isUp = currentValue >= lastValueState.value; // Compare with last value
+        lastValueState.value = currentValue; // Update last value for next iteration
 
-    function generateRandomCandleData(previousClose) { const randFactor = (max, min = 0) => Math.random() * (max - min) + min; const validPrevClose = (typeof previousClose === 'number' && !isNaN(previousClose)) ? previousClose : (chartConfig.priceMin + chartConfig.priceMax) / 2; let open = validPrevClose + randFactor(2, -2); let close = open + randFactor(8, -8); open = Math.max(chartConfig.priceMin * 0.8, Math.min(chartConfig.priceMax * 1.2, open)); close = Math.max(chartConfig.priceMin * 0.8, Math.min(chartConfig.priceMax * 1.2, close)); const high = Math.max(open, close) + randFactor(3); const low = Math.min(open, close) - randFactor(3); const time = Math.floor(Date.now() / 1000); return { time, open, high, low, close }; }
+        // 2. Create new bar element
+        const bar = document.createElement('div');
+        bar.classList.add('ticker-bar');
+        bar.classList.add(isUp ? tickerConfig.upColorClass : tickerConfig.downColorClass);
+        bar.style.height = `${newHeight}px`;
 
-    function initializeChart(container, dataArrayRef) {
-        if (typeof LightweightCharts === 'undefined' || !container) { console.error("ERROR: LightweightCharts library or container not ready!", container?.id); return null; }
-        const containerWidth = container.clientWidth; const containerHeight = container.clientHeight;
-        console.log(`Container ${container.id} dimensions: ${containerWidth}x${containerHeight}`); if (containerWidth === 0 || containerHeight === 0) { console.warn(`Container ${container.id} has zero dimensions.`); }
-        container.innerHTML = '';
-        console.log(`Attempting to create chart in: ${container.id}`);
-        // Updated Chart Options
-        const chartOptions = {
-            width: containerWidth || 220, height: containerHeight || 140,
-            layout: { background: { color: chartConfig.chartBackgroundColor }, textColor: chartConfig.textColor, }, // Black BG, Hidden Text
-            grid: { vertLines: { visible: false }, horzLines: { visible: false }, },
-            crosshair: { mode: LightweightCharts.CrosshairMode.Hidden },
-            timeScale: { visible: false, borderVisible: false }, // Hide axes
-            priceScale: { visible: false, borderVisible: false },
-            handleScroll: false, handleScale: false,
-         };
-        try {
-            const chart = LightweightCharts.createChart(container, chartOptions);
-            console.log(`Chart object created for ${container.id}:`); console.dir(chart);
-            if (!chart || typeof chart.addCandlestickSeries !== 'function') { console.error("CRITICAL ERROR: chart.addCandlestickSeries is NOT a function!", chart); return null; }
-            // Updated Candle Colors
-            const candleSeries = chart.addCandlestickSeries({ upColor: chartConfig.upColor, downColor: chartConfig.downColor, borderVisible: false, wickUpColor: chartConfig.upColor, wickDownColor: chartConfig.downColor });
-            let lastClose = chartConfig.priceMin + Math.random() * (chartConfig.priceMax - chartConfig.priceMin); let currentTime = Math.floor(Date.now() / 1000) - (chartConfig.candlesToShow * 300); dataArrayRef.length = 0;
-            for (let i = 0; i < chartConfig.candlesToShow; i++) { const candle = generateRandomCandleData(lastClose); candle.time = currentTime; dataArrayRef.push(candle); lastClose = candle.close; currentTime += 300; }
-            candleSeries.setData(dataArrayRef);
-            console.log(`Chart initialized successfully for ${container.id}`);
-            return { chart, candleSeries };
-        } catch (error) { console.error(`Error during chart initialization for ${container.id}:`, error); return null; }
+        // 3. Add new bar to the beginning
+        container.insertBefore(bar, container.firstChild);
+
+        // 4. Remove oldest bar if container is full
+        while (container.children.length > tickerConfig.maxBars) {
+            container.removeChild(container.lastChild);
+        }
     }
 
-    function updateChart(chartInfo, dataArray) { if (!chartInfo || !chartInfo.candleSeries || dataArray.length === 0) return; const lastCandle = dataArray[dataArray.length - 1]; const nextCandle = generateRandomCandleData(lastCandle.close); nextCandle.time = lastCandle.time + 300; try { chartInfo.candleSeries.update(nextCandle); dataArray.push(nextCandle); if (dataArray.length > chartConfig.candlesToShow * 2) { dataArray.shift(); } chartInfo.chart.timeScale().scrollToRealTime(); } catch(error) { console.error("Error updating chart:", error); } }
+    function startTickerAnimation() {
+        console.log("Starting ticker bar animation...");
+        if (tickerIntervalLeft) clearInterval(tickerIntervalLeft);
+        if (tickerIntervalRight) clearInterval(tickerIntervalRight);
 
-    function startStockChartAnimation() {
-        console.log("Attempting to start stock chart animations...");
-        if (stockIntervalLeft) clearInterval(stockIntervalLeft); if (stockIntervalRight) clearInterval(stockIntervalRight); currentDataLeft = []; currentDataRight = [];
-        const initLeft = initializeChart(chartContainerLeft, currentDataLeft); if (initLeft) { chartLeft = initLeft.chart; candleSeriesLeft = initLeft.candleSeries; stockIntervalLeft = setInterval(() => updateChart(initLeft, currentDataLeft), chartConfig.updateInterval); } else { console.error("Failed to initialize left chart."); }
-        const initRight = initializeChart(chartContainerRight, currentDataRight); if (initRight) { chartRight = initRight.chart; candleSeriesRight = initRight.candleSeries; setTimeout(() => { stockIntervalRight = setInterval(() => updateChart(initRight, currentDataRight), chartConfig.updateInterval + 30); }, 500); } else { console.error("Failed to initialize right chart."); }
-        window.addEventListener('resize', () => { if(chartLeft && chartContainerLeft) chartLeft.resize(chartContainerLeft.clientWidth, chartContainerLeft.clientHeight); if(chartRight && chartContainerRight) chartRight.resize(chartContainerRight.clientWidth, chartContainerRight.clientHeight); });
-        console.log("Stock chart animation setup complete (check console for errors).");
+        // Need objects to pass last value by reference
+        let lastValStateLeft = { value: tickerConfig.maxHeight / 2 };
+        let lastValStateRight = { value: tickerConfig.maxHeight / 2 };
+
+
+        if (tickerContainerLeft) {
+            tickerIntervalLeft = setInterval(() => updateTicker(tickerContainerLeft, lastValStateLeft), tickerConfig.updateInterval);
+        }
+        if (tickerContainerRight) {
+             // Slight delay for right side
+            setTimeout(() => {
+                 tickerIntervalRight = setInterval(() => updateTicker(tickerContainerRight, lastValStateRight), tickerConfig.updateInterval + 20); // Slightly different interval
+            }, 300);
+        }
     }
-    // --- Stock Chart Logic END ---
+    // --- Ticker Bar Simulation Logic END ---
 
 
     // --- Entry Screen Logic ---
@@ -109,9 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); });
             updateVolumeUI();
             if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); }
-            console.log("Queueing stock chart initialization...");
-            // Initialize charts AFTER a delay
-            setTimeout(() => { startStockChartAnimation(); }, 200);
+            startTickerAnimation(); // <<< Start Ticker Simulation
         }, 500);
     }, { once: true });
 
@@ -139,4 +129,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Close Popups when Clicking Outside Logic ---
     document.addEventListener('click', function(event) { let clickedInsideAnyPopup = false; allPopups.forEach(p => { if (p.contains(event.target)) { clickedInsideAnyPopup = true; } }); let clickedOnAnyTrigger = false; popupTriggers.forEach(t => { if (t.contains(event.target)) { clickedOnAnyTrigger = true; } }); const volumeControl = document.getElementById('volume-control-container'); const isClickInsideVolume = volumeControl ? volumeControl.contains(event.target) : false; if (!clickedInsideAnyPopup && !clickedOnAnyTrigger && !isClickInsideVolume) { closeAllPopups(); } });
 
-}); // End of DOMContentLoaded
+}); // End of DOMContentLoaded listener

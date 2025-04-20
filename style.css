@@ -30,30 +30,17 @@ body {
     height: 100%;
     background-color: #000;
     display: flex;
-    /* Stack elements vertically */
-    flex-direction: column;
+    /* Reverted to simple centering */
     justify-content: center;
     align-items: center;
+    flex-direction: column; /* Center text if needed */
     z-index: 100;
     opacity: 1;
     transition: opacity 0.5s ease-out;
-    overflow: hidden; /* Hide potential overflow */
+    overflow: hidden;
 }
 
-/* Entry Screen Cat Image */
-#entry-cat-image {
-    display: block;
-    max-width: 120px; /* Adjust size as needed */
-    width: 30%; /* Relative width */
-    height: auto;
-    margin-bottom: 20px; /* Space below cat */
-    /* Faint neon outline effect */
-    filter: drop-shadow(0 0 1px rgba(255, 0, 255, 0.2)) /* Faint pink */
-            drop-shadow(0 0 2px rgba(157, 0, 255, 0.15)) /* Fainter purple */
-            drop-shadow(0 0 3px rgba(255, 0, 255, 0.1)); /* Faintest pink */
-    opacity: 0.95; /* Slightly transparent */
-}
-
+/* Entry Screen Cat Image Style REMOVED */
 
 #entry-screen p {
      font-size: 1.5em;
@@ -61,7 +48,7 @@ body {
      text-shadow: none;
      position: static;
      animation: none;
-     margin-top: 0; /* Adjust spacing if needed */
+     margin-top: 0; /* Reset margin if needed */
 }
 
 #entry-screen.hidden {
@@ -269,15 +256,11 @@ body {
     text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
 }
 
-/* --- Volume Control START --- */
+/* --- Volume Control --- */
 #volume-control-container {
     position: fixed;
-    /* Moved to top-left */
     top: 15px;
     left: 15px;
-    /* Removed bottom/right */
-    /* bottom: 15px; */
-    /* right: 15px; */
     background-color: rgba(40, 30, 50, 0.6);
     border-radius: 25px;
     padding: 5px;
@@ -286,17 +269,15 @@ body {
     z-index: 1100;
     backdrop-filter: blur(3px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    /* Hidden by default, shown by JS */
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.9s; /* Fade in after delay */
+    transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.9s;
 }
 #volume-control-container.visible {
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.5s; /* Adjust timing */
+    transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.5s;
 }
-
 
 #volume-control-container:hover {
     background-color: rgba(50, 40, 60, 0.8);
@@ -304,45 +285,26 @@ body {
 }
 
 #mute-button {
-    background: none;
-    border: none;
-    color: #eee;
-    padding: 5px 8px 5px 5px;
-    margin: 0;
-    line-height: 1;
+    background: none; border: none; color: #eee;
+    padding: 5px 8px 5px 5px; margin: 0; line-height: 1;
 }
 
 #volume-icon {
-    font-size: 1.1rem;
-    vertical-align: middle;
-    transition: color 0.2s ease;
+    font-size: 1.1rem; vertical-align: middle; transition: color 0.2s ease;
 }
-#mute-button:hover #volume-icon {
-    color: #ff00ff;
-}
+#mute-button:hover #volume-icon { color: #ff00ff; }
 
 #volume-slider {
-    width: 0;
-    opacity: 0;
-    visibility: hidden;
+    width: 0; opacity: 0; visibility: hidden;
     transition: width 0.3s ease, opacity 0.3s ease 0.1s, visibility 0s linear 0.3s;
-    margin-left: 0;
-    height: 8px;
-    vertical-align: middle;
-    appearance: none;
-    -webkit-appearance: none;
-    background: transparent;
+    margin-left: 0; height: 8px; vertical-align: middle;
+    appearance: none; -webkit-appearance: none; background: transparent;
 }
 
 #volume-control-container:hover #volume-slider {
-    width: 100px;
-    opacity: 1;
-    visibility: visible;
-    margin-left: 8px;
+    width: 100px; opacity: 1; visibility: visible; margin-left: 8px;
     transition: width 0.3s ease, opacity 0.3s ease, visibility 0s linear 0s;
 }
-
-/* Custom Slider Track */
 #volume-slider::-webkit-slider-runnable-track {
     width: 100%; height: 6px;
     background: linear-gradient(to right, #ff00ff, #9d00ff);
@@ -353,8 +315,6 @@ body {
     background: linear-gradient(to right, #ff00ff, #9d00ff);
     border-radius: 3px; border: 1px solid rgba(0, 0, 0, 0.3);
 }
-
-/* Custom Slider Thumb (Handle) */
 #volume-slider::-webkit-slider-thumb {
     appearance: none; -webkit-appearance: none; margin-top: -5px;
     height: 16px; width: 16px; background: #ffffff;
@@ -364,7 +324,6 @@ body {
     height: 14px; width: 14px; background: #ffffff;
     border-radius: 50%; border: 1px solid #555; box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
 }
-/* --- Volume Control END --- */
 
 
 /* --- Custom Cursor --- */
@@ -381,7 +340,7 @@ body {
     animation: cursor-color-change-text 4s linear infinite;
     width: auto;
     height: auto;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%); /* Centered */
 }
 
 #custom-cursor::before,
@@ -393,26 +352,29 @@ body {
     0%   { color: #ff00ff; } 33%  { color: #9d00ff; } 66%  { color: #ff0033; } 100% { color: #ff00ff; }
 }
 
-/* Cursor Trail */
-.trail-dot {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
+/* Cursor Trail REMOVED */
+/* .trail-dot REMOVED */
+/* @keyframes cursor-color-change-trail REMOVED */
+/* @keyframes fade-out REMOVED */
+
+
+/* --- Follower Cat START --- */
+#follower-cat {
+    position: fixed;
+    width: 24px; /* Adjust size as needed */
+    height: 24px;
+    background-image: url('follower-cat.png'); /* Make sure this file exists! */
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 9998; /* Below main cursor */
     pointer-events: none;
-    z-index: 9998;
-    opacity: 1;
-    animation: fade-out 0.8s linear forwards, cursor-color-change-trail 4s linear infinite;
-    transform: translate(-50%, -50%);
+    /* Start off-screen */
+    left: -50px;
+    top: -50px;
+    /* Added for rotation */
+    transform-origin: center center;
+    /* Transition might make rotation jerky with requestAnimationFrame, remove if needed */
+    /* transition: transform 0.1s linear; */
+    will-change: transform, left, top; /* Performance hint */
 }
-
-@keyframes cursor-color-change-trail {
-    0%   { background-color: #ff00ff; } 33%  { background-color: #9d00ff; } 66%  { background-color: #ff0033; } 100% { background-color: #ff00ff; }
-}
-
-@keyframes fade-out {
-    to {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
-    }
-}
+/* --- Follower Cat END --- */

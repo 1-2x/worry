@@ -24,7 +24,7 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 @keyframes blink-caret { from, to { opacity: 1; } 50% { opacity: 0; } }
 
 /* Title Styling (ASCII Art - Worry) */
-.faith-title { font-family: 'Courier New', Courier, monospace; font-size: 0.9rem; line-height: 1.0; margin-bottom: 1.5rem; font-weight: normal; text-align: center; width: fit-content; margin-left: auto; margin-right: auto; color: #ff00ff; text-shadow: 0 0 6px #ff00ff, 0 0 10px #ff00ff; animation: none; white-space: pre; position: relative; z-index: 10; }
+.faith-title { font-family: 'Courier New', Courier, monospace; font-size: 0.9rem; line-height: 1.0; margin-bottom: 1.5rem; font-weight: normal; text-align: center; width: fit-content; margin-left: auto; margin-right: auto; color: #ff00ff; text-shadow: 0 0 6px #ff00ff, 0 0 10px #ff00ff; animation: none; white-space: pre; }
 
 /* Icon Links */
 .icon-links { margin-bottom: 2rem; position: relative; }
@@ -79,41 +79,31 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 .trail-cursor-char { position: fixed; pointer-events: none; z-index: 9998; opacity: 1; font-size: 1.5rem; line-height: 1; transform: translate(-50%, -50%); animation: cursor-color-change-text 4s linear infinite, fall-fade-char 1.0s linear forwards; }
 @keyframes fall-fade-char { 0% { transform: translate(-50%, -50%) translateY(0); opacity: 1; } 100% { transform: translate(-50%, -50%) translateY(30vh); opacity: 0; } }
 
-/* --- Ticker Bar Simulation Styles START --- */
-.ticker-container {
-    position: fixed; top: 50%; transform: translateY(-50%);
-    width: 150px; height: 80px; z-index: 5;
-    display: flex; align-items: flex-end; overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.5);
-    opacity: 0; /* Keep hidden until main content visible */
+/* --- Graph Simulation Styles START --- */
+.graph-container {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 200px; /* Adjust as needed */
+    height: 100px; /* Adjust as needed */
+    z-index: 5; /* Below main content */
+    opacity: 0; /* Hidden initially */
     transition: opacity 0.5s ease 1s;
-    padding: 5px; box-sizing: border-box;
-
-    /* --- DEBUGGING STYLES --- */
-    border: 2px solid yellow !important; /* Make container visible */
-    opacity: 0.8 !important; /* Make always visible */
-    /* --- END DEBUGGING STYLES --- */
+    background-color: #000; /* Black background */
+    /* filter: drop-shadow(0 0 5px rgba(157, 0, 255, 0.5)); /* Optional neon glow */
+    /* border: none; /* No border */
+    overflow: hidden; /* Ensure canvas stays within bounds */
 }
-#main-content.visible .ticker-container { opacity: 0.8; }
-#ticker-container-left { left: 20px; }
-#ticker-container-right { right: 20px; }
-
-.ticker-bar {
-    flex-shrink: 0; width: 4px; margin-right: 2px;
-    /* --- DEBUGGING STYLES --- */
-    height: 40px !important; /* Fixed height */
-    background-color: lime !important; /* Bright color */
-    box-shadow: none !important; /* Remove glow */
-    /* --- END DEBUGGING STYLES --- */
-    /* Original styles commented out for debug: */
-    /* background-color: #9d00ff; */
-    /* transition: height 0.2s ease-out; */
-    /* box-shadow: 0 0 3px currentColor; */
-    /* border-radius: 1px; */
+#main-content.visible .graph-container {
+    opacity: 0.8; /* Visible when main content is shown */
 }
-.ticker-bar:last-child { margin-right: 0; }
+#graph-container-left { left: 20px; }
+#graph-container-right { right: 20px; }
 
-/* Color for "up" bars */
-/* Commented out for debug */
-/* .ticker-bar.bar-up { background-color: #ee82ee; } */
-/* --- Ticker Bar Simulation Styles END --- */
+/* Style for the canvas itself */
+.graph-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+/* --- Graph Simulation Styles END --- */

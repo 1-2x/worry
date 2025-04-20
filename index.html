@@ -1,64 +1,144 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mewo</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-</head>
-<body>
-    <div id="custom-cursor"></div>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM Loaded. Checking for LightweightCharts library..."); // Debug
+    console.log("LightweightCharts object:", typeof LightweightCharts, LightweightCharts); // Debug: Check library object
 
-    <div id="chart-container-left" class="chart-container"></div>
-    <div id="chart-container-right" class="chart-container"></div>
+    // --- Standard Elements ---
+    const entryScreen = document.getElementById('entry-screen');
+    const mainContent = document.getElementById('main-content');
+    const backgroundMusic = document.getElementById('background-music');
+    const customCursor = document.getElementById('custom-cursor');
+    const popupTriggers = document.querySelectorAll('.popup-trigger');
+    const allPopups = document.querySelectorAll('.popup-menu');
+    const visitCountSpan = document.getElementById('visit-count');
+    const volumeContainer = document.getElementById('volume-control-container');
+    const muteButton = document.getElementById('mute-button');
+    const volumeIcon = document.getElementById('volume-icon');
+    const volumeSlider = document.getElementById('volume-slider');
+    const locationTextElement = document.getElementById('location-text');
+    const typingCursorElement = document.getElementById('typing-cursor');
 
-    <div id="entry-screen">
-        <p>Click to Enter</p>
-    </div>
+    // --- Stock Chart Elements & State ---
+    const chartContainerLeft = document.getElementById('chart-container-left');
+    const chartContainerRight = document.getElementById('chart-container-right');
+    console.log("Chart Containers:", chartContainerLeft, chartContainerRight); // Debug: Check if containers are found
 
-    <div id="main-content">
-        <div id="location-indicator">
-            <i class="fa-solid fa-location-dot"></i>
-            <span id="location-text"><span id="typing-cursor">|</span></span>
-        </div>
+    let chartLeft = null; let candleSeriesLeft = null; let chartRight = null; let candleSeriesRight = null;
+    let stockIntervalLeft = null; let stockIntervalRight = null;
+    let currentDataLeft = []; let currentDataRight = [];
+    const chartConfig = { candlesToShow: 30, updateInterval: 300, priceMin: 40, priceMax: 100, neonViolet: '#ee82ee', neonPurple: '#9d00ff', chartBackgroundColor: 'rgba(0, 0, 0, 0)', textColor: 'rgba(200, 200, 200, 0.1)' };
 
-        <div class="icon-links">
-            <a href="#" aria-label="TikTok Menu" id="tiktok-pop-trigger" data-popup-target="tiktok-popup" class="icon-link popup-trigger"><i class="fa-brands fa-tiktok"></i></a>
-            <a href="#" aria-label="Discord Menu" id="discord-pop-trigger" data-popup-target="discord-popup" class="icon-link popup-trigger"><i class="fa-brands fa-discord"></i></a>
-        </div>
+    // --- Global State ---
+    let visiblePopupForTilt = null; let lastTrailTime = 0; const trailInterval = 50;
 
-         <div id="tiktok-popup" class="popup-menu hidden">
-             <div class="popup-row"><a href="https://www.tiktok.com/@expertsly" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="TikTok User 1"><i class="fab fa-tiktok popup-icon"></i><span class="popup-text multicolor-neon"><span>e</span><span>x</span><span>p</span><span>e</span><span>r</span><span>t</span><span>s</span><span>l</span><span>y</span></span></a></div>
-             <div class="popup-row"><a href="https://www.tiktok.com/@worry.rip" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="TikTok User 2"><i class="fab fa-tiktok popup-icon"></i><span class="popup-text multicolor-neon"><span>w</span><span>o</span><span>r</span><span>r</span><span>y</span><span>.</span><span>r</span><span>i</span><span>p</span></span></a></div>
-         </div>
-        <div id="discord-popup" class="popup-menu hidden">
-            <div class="popup-row"><a href="https://discord.com/users/1265799421417754664" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="Discord User 1"><i class="fab fa-discord popup-icon"></i><span class="popup-text multicolor-neon"><span>w</span><span>r</span><span>y</span><span>.</span><span>r</span><span>i</span><span>p</span></span></a></div>
-            <div class="popup-row"><a href="https://discord.com/users/397485438631411712" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="Discord User 2"><i class="fab fa-discord popup-icon"></i><span class="popup-text multicolor-neon"><span>y</span><span>b</span><span>c</span><span>a</span><span>n</span><span>d</span><span>y</span></span></a></div>
-            <div class="popup-row"><a href="https://discord.com/users/1202318974109614111" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="Discord User 3"><i class="fab fa-discord popup-icon"></i><span class="popup-text multicolor-neon"><span>z</span><span>v</span><span>z</span><span>h</span></span></a></div>
-         </div>
+    // --- Initial Setup ---
+    if (customCursor) { customCursor.textContent = '𖹭'; }
+    if (visitCountSpan) { let count = localStorage.getItem('pageVisits_worrySite') || 0; visitCountSpan.textContent = ++count; localStorage.setItem('pageVisits_worrySite', count); }
+    const titles = ['m', 'me', 'mew', 'mewo', 'meow', 'meow .', 'meow ..', 'meow ...', 'meow ..', 'meow .']; let titleIndex = 0; setInterval(() => { document.title = titles[titleIndex]; titleIndex = (titleIndex + 1) % titles.length; }, 600);
 
-        <div id="view-counter-area">
-            <i class="fa-solid fa-eye" id="color-changing-eye"></i>
-            <span id="visit-count">0</span>
-        </div>
+    // --- Location Typing Effect ---
+    const locationString = "London, UK"; const typeSpeed = 180; const deleteSpeed = 120; const pauseDuration = 2500; let locationCharIndex = 0; let locationIsDeleting = false; let locationLoopTimeout;
+    function typeDeleteLoop() { clearTimeout(locationLoopTimeout); const cursor = typingCursorElement; if (!locationTextElement || !cursor) return; if (!locationIsDeleting) { if (locationCharIndex < locationString.length) { const letterSpan = document.createElement('span'); letterSpan.textContent = locationString.charAt(locationCharIndex); locationTextElement.insertBefore(letterSpan, cursor); locationCharIndex++; locationLoopTimeout = setTimeout(typeDeleteLoop, typeSpeed); } else { locationIsDeleting = true; if (cursor) cursor.style.animationPlayState = 'paused'; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration); } } else { const letterSpans = locationTextElement.querySelectorAll('span:not(#typing-cursor)'); if (letterSpans.length > 0) { if (cursor) cursor.style.animationPlayState = 'running'; locationTextElement.removeChild(letterSpans[letterSpans.length - 1]); locationLoopTimeout = setTimeout(typeDeleteLoop, deleteSpeed); } else { locationIsDeleting = false; locationCharIndex = 0; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration / 2); } } }
 
-        </div>
+    // --- Stock Chart Logic START ---
+    function generateRandomCandleData(previousClose) { const randFactor = (max, min = 0) => Math.random() * (max - min) + min; const validPrevClose = (typeof previousClose === 'number' && !isNaN(previousClose)) ? previousClose : (chartConfig.priceMin + chartConfig.priceMax) / 2; let open = validPrevClose + randFactor(2, -2); let close = open + randFactor(8, -8); open = Math.max(chartConfig.priceMin * 0.8, Math.min(chartConfig.priceMax * 1.2, open)); close = Math.max(chartConfig.priceMin * 0.8, Math.min(chartConfig.priceMax * 1.2, close)); const high = Math.max(open, close) + randFactor(3); const low = Math.min(open, close) - randFactor(3); const time = Math.floor(Date.now() / 1000); return { time, open, high, low, close }; }
 
-    <audio id="background-music" loop>
-        <source src="Crystal Castles _ it fit when i was a kid.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
+    function initializeChart(container, dataArrayRef) {
+        // Extra check for library readiness
+        if (typeof LightweightCharts === 'undefined' || !container) {
+             console.error("ERROR: LightweightCharts library or container not ready!", container?.id);
+             return null;
+        }
+        container.innerHTML = ''; // Clear previous chart if any
+        console.log(`Attempting to create chart in: ${container.id}`); // Debug
 
-    <div id="volume-control-container">
-        <button id="mute-button" aria-label="Mute/Unmute">
-            <i id="volume-icon" class="fa-solid fa-volume-high"></i>
-        </button>
-        <input type="range" id="volume-slider" title="Volume" min="0" max="1" step="0.01" value="1">
-    </div>
+        const chartOptions = { width: container.clientWidth || 220, height: container.clientHeight || 140, layout: { background: { color: chartConfig.chartBackgroundColor }, textColor: chartConfig.textColor, }, grid: { vertLines: { visible: false }, horzLines: { visible: false }, }, crosshair: { mode: LightweightCharts.CrosshairMode.Hidden }, timeScale: { visible: false, fixLeftEdge: true, fixRightEdge: true, lockVisibleTimeRangeOnResize: true, borderVisible: false }, priceScale: { visible: false, borderVisible: false }, handleScroll: false, handleScale: false, };
 
-    <script src="script.js"></script>
+        try {
+            const chart = LightweightCharts.createChart(container, chartOptions);
+            console.log("Chart object created:", chart); // Debug: Log the chart object
 
-    </body>
-</html>
+            // *** Check if the necessary method exists BEFORE calling it ***
+            if (!chart || typeof chart.addCandlestickSeries !== 'function') {
+                console.error("CRITICAL ERROR: chart.addCandlestickSeries is NOT a function on the created chart object!", chart);
+                return null; // Stop if method doesn't exist
+            }
+
+            const candleSeries = chart.addCandlestickSeries({ upColor: chartConfig.neonViolet, downColor: chartConfig.neonPurple, borderVisible: false, wickUpColor: chartConfig.neonViolet, wickDownColor: chartConfig.neonPurple, });
+
+            let lastClose = chartConfig.priceMin + Math.random() * (chartConfig.priceMax - chartConfig.priceMin); let currentTime = Math.floor(Date.now() / 1000) - (chartConfig.candlesToShow * 300); dataArrayRef.length = 0;
+            for (let i = 0; i < chartConfig.candlesToShow; i++) { const candle = generateRandomCandleData(lastClose); candle.time = currentTime; dataArrayRef.push(candle); lastClose = candle.close; currentTime += 300; }
+            candleSeries.setData(dataArrayRef);
+
+            console.log(`Chart initialized successfully for ${container.id}`);
+            return { chart, candleSeries };
+
+        } catch (error) {
+            console.error(`Error during chart initialization for ${container.id}:`, error);
+            return null;
+        }
+    }
+
+    function updateChart(chartInfo, dataArray) { if (!chartInfo || !chartInfo.candleSeries || dataArray.length === 0) return; const lastCandle = dataArray[dataArray.length - 1]; const nextCandle = generateRandomCandleData(lastCandle.close); nextCandle.time = lastCandle.time + 300; try { chartInfo.candleSeries.update(nextCandle); dataArray.push(nextCandle); if (dataArray.length > chartConfig.candlesToShow * 2) { dataArray.shift(); } chartInfo.chart.timeScale().scrollToPosition(-1, false); } catch(error) { console.error("Error updating chart:", error); } }
+
+    function startStockChartAnimation() {
+        console.log("Attempting to start stock chart animations..."); // Debug
+        if (stockIntervalLeft) clearInterval(stockIntervalLeft); if (stockIntervalRight) clearInterval(stockIntervalRight); currentDataLeft = []; currentDataRight = [];
+
+        const initLeft = initializeChart(chartContainerLeft, currentDataLeft);
+        if (initLeft) { chartLeft = initLeft.chart; candleSeriesLeft = initLeft.candleSeries; stockIntervalLeft = setInterval(() => updateChart(initLeft, currentDataLeft), chartConfig.updateInterval); } else { console.error("Failed to initialize left chart."); }
+
+        const initRight = initializeChart(chartContainerRight, currentDataRight);
+        if (initRight) { chartRight = initRight.chart; candleSeriesRight = initRight.candleSeries; setTimeout(() => { stockIntervalRight = setInterval(() => updateChart(initRight, currentDataRight), chartConfig.updateInterval + 30); }, 500); } else { console.error("Failed to initialize right chart."); }
+
+        window.addEventListener('resize', () => { if(chartLeft && chartContainerLeft) chartLeft.resize(chartContainerLeft.clientWidth, chartContainerLeft.clientHeight); if(chartRight && chartContainerRight) chartRight.resize(chartContainerRight.clientWidth, chartContainerRight.clientHeight); });
+        console.log("Stock chart animation setup complete (check for errors).");
+    }
+    // --- Stock Chart Logic END ---
+
+
+    // --- Entry Screen Logic ---
+    entryScreen.addEventListener('click', () => {
+        console.log("Entry screen clicked!"); // Debug
+        entryScreen.classList.add('hidden');
+        setTimeout(() => {
+            entryScreen.style.display = 'none';
+            mainContent.classList.add('visible');
+            if (volumeContainer) { volumeContainer.classList.add('visible'); }
+            backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); });
+            updateVolumeUI();
+            if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); }
+
+            // Initialize charts after a tiny delay, hoping library is ready
+            console.log("Queueing stock chart initialization..."); // Debug
+            setTimeout(() => {
+                startStockChartAnimation();
+            }, 50); // Small delay (50ms)
+
+        }, 500);
+    }, { once: true });
+
+
+    // --- Cursor Tracking, Popup Tilt, Falling Trail ---
+    document.addEventListener('mousemove', (e) => { if (customCursor) { customCursor.style.left = `${e.clientX}px`; customCursor.style.top = `${e.clientY}px`; } if(visiblePopupForTilt) { tiltPopup(e, visiblePopupForTilt); } const now = Date.now(); if (now - lastTrailTime > trailInterval) { createFallingTrailChar(e.clientX, e.clientY); lastTrailTime = now; } });
+    function createFallingTrailChar(x, y) { const trailEl = document.createElement('div'); trailEl.classList.add('trail-cursor-char'); trailEl.textContent = '𖹭'; trailEl.style.left = `${x}px`; trailEl.style.top = `${y}px`; document.body.appendChild(trailEl); setTimeout(() => { trailEl.remove(); }, 1200); }
+    function tiltPopup(e, popupElement) { const centerX = window.innerWidth / 2; const centerY = window.innerHeight / 2; const deltaX = e.clientX - centerX; const deltaY = e.clientY - centerY; const maxRotate = 15; const rotateY = -(deltaX / centerX) * maxRotate; const rotateX = (deltaY / centerY) * maxRotate; const clampedRotateX = Math.max(-maxRotate, Math.min(maxRotate, rotateX)); const clampedRotateY = Math.max(-maxRotate, Math.min(maxRotate, rotateY)); popupElement.style.transform = `translateX(-50%) rotateX(${clampedRotateX}deg) rotateY(${clampedRotateY}deg)`; }
+    function resetPopupTilt(popupElement) { if(popupElement) { popupElement.style.transform = `translateX(-50%) rotateX(0deg) rotateY(0deg)`; } }
+
+     // --- Volume Control Logic ---
+     function updateVolumeUI() { if (!backgroundMusic || !volumeIcon || !volumeSlider) return; volumeSlider.value = backgroundMusic.muted ? 0 : backgroundMusic.volume; if (backgroundMusic.muted || backgroundMusic.volume === 0) { volumeIcon.className = 'fa-solid fa-volume-xmark'; } else if (backgroundMusic.volume <= 0.5) { volumeIcon.className = 'fa-solid fa-volume-low'; } else { volumeIcon.className = 'fa-solid fa-volume-high'; } volumeIcon.classList.add('fa-solid'); }
+     if (muteButton) { muteButton.addEventListener('click', () => { if (!backgroundMusic) return; backgroundMusic.muted = !backgroundMusic.muted; if (!backgroundMusic.muted && backgroundMusic.volume === 0) { backgroundMusic.volume = 0.1; } updateVolumeUI(); }); }
+     if (volumeSlider) { volumeSlider.addEventListener('input', function() { if (!backgroundMusic) return; backgroundMusic.volume = parseFloat(this.value); backgroundMusic.muted = (backgroundMusic.volume === 0); updateVolumeUI(); }); }
+     setTimeout(updateVolumeUI, 100);
+     if (backgroundMusic) { backgroundMusic.addEventListener('volumechange', updateVolumeUI); }
+
+    // --- Popup Handling Logic ---
+    function closeAllPopups() { allPopups.forEach(popup => { if (popup.classList.contains('visible')) { popup.classList.remove('visible'); resetPopupTilt(popup); } }); visiblePopupForTilt = null; }
+    popupTriggers.forEach(trigger => { trigger.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); const targetPopupId = trigger.getAttribute('data-popup-target'); const targetPopup = document.getElementById(targetPopupId); if (!targetPopup) return; const isCurrentlyVisible = targetPopup.classList.contains('visible'); closeAllPopups(); if (!isCurrentlyVisible) { targetPopup.classList.add('visible'); visiblePopupForTilt = targetPopup; } }); });
+
+    // --- Right-Click Disable ---
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // --- Close Popups when Clicking Outside Logic ---
+    document.addEventListener('click', function(event) { let clickedInsideAnyPopup = false; allPopups.forEach(p => { if (p.contains(event.target)) { clickedInsideAnyPopup = true; } }); let clickedOnAnyTrigger = false; popupTriggers.forEach(t => { if (t.contains(event.target)) { clickedOnAnyTrigger = true; } }); const volumeControl = document.getElementById('volume-control-container'); const isClickInsideVolume = volumeControl ? volumeControl.contains(event.target) : false; if (!clickedInsideAnyPopup && !clickedOnAnyTrigger && !isClickInsideVolume) { closeAllPopups(); } });
+
+});

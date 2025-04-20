@@ -25,7 +25,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let stockIntervalRight = null;
     let currentDataLeft = [];
     let currentDataRight = [];
-    const chartCandles = 25; // Number of candles visible
+    // Chart config (adjust as needed)
+    const chartConfig = {
+        candlesToShow: 30, // More candles for smoother look
+        updateInterval: 300, // Faster update (adjust with loopDuration ~9s)
+        priceMin: 40,
+        priceMax: 100,
+        neonViolet: '#ee82ee',
+        neonPurple: '#9d00ff',
+        chartBackgroundColor: 'rgba(0, 0, 0, 0)', // Transparent chart bg
+        textColor: 'rgba(200, 200, 200, 0.1)' // Very faint text if axis were visible
+    };
 
     // --- Global State ---
     let visiblePopupForTilt = null;
@@ -42,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function typeDeleteLoop() { clearTimeout(locationLoopTimeout); const cursor = typingCursorElement; if (!locationTextElement || !cursor) return; if (!locationIsDeleting) { if (locationCharIndex < locationString.length) { const letterSpan = document.createElement('span'); letterSpan.textContent = locationString.charAt(locationCharIndex); locationTextElement.insertBefore(letterSpan, cursor); locationCharIndex++; locationLoopTimeout = setTimeout(typeDeleteLoop, typeSpeed); } else { locationIsDeleting = true; if (cursor) cursor.style.animationPlayState = 'paused'; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration); } } else { const letterSpans = locationTextElement.querySelectorAll('span:not(#typing-cursor)'); if (letterSpans.length > 0) { if (cursor) cursor.style.animationPlayState = 'running'; locationTextElement.removeChild(letterSpans[letterSpans.length - 1]); locationLoopTimeout = setTimeout(typeDeleteLoop, deleteSpeed); } else { locationIsDeleting = false; locationCharIndex = 0; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration / 2); } } }
 
     // --- Entry Screen Logic ---
-    entryScreen.addEventListener('click', () => { entryScreen.classList.add('hidden'); setTimeout(() => { entryScreen.style.display = 'none'; mainContent.classList.add('visible'); if (volumeContainer) { volumeContainer.classList.add('visible'); } backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); }); updateVolumeUI(); if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); } initializeStockCharts(); /* <<< Initialize Charts */ startStockChartAnimation(); /* <<< Start Chart Updates */ }, 500); }, { once: true });
+    entryScreen.addEventListener('click', () => { entryScreen.classList.add('hidden'); setTimeout(() => { entryScreen.style.display = 'none'; mainContent.classList.add('visible'); if (volumeContainer) { volumeContainer.classList.add('visible'); } backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); }); updateVolumeUI(); if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); } initializeStockCharts(); startStockChartAnimation(); }, 500); }, { once: true });
 
     // --- Cursor Tracking, Popup Tilt, Falling Trail ---
     document.addEventListener('mousemove', (e) => {
@@ -70,106 +80,116 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('contextmenu', event => event.preventDefault());
 
     // --- Stock Chart Logic START ---
-    const neonPurple = '#9d00ff';
-    const neonViolet = '#ee82ee';
-
-    function generateRandomCandle(previousClose) {
-        const open = previousClose + (Math.random() - 0.5) * 5; // Start near previous close
-        const close = open + (Math.random() - 0.5) * 15; // Wider range for close
-        const high = Math.max(open, close) + Math.random() * 5;
-        const low = Math.min(open, close) - Math.random() * 5;
-        // Simple time increment - using seconds since epoch for Lightweight Charts
-        const time = Math.floor(Date.now() / 1000);
-        return { time, open, high, low, close };
+    // Function definitions must come before they are called
+    function generateRandomCandleData(previousClose) {
+        const randFactor = (max, min = 0) => Math.random() * (max - min) + min;
+        const open = previousClose + randFactor(5, -5);
+        const close = open + randFactor(15, -15);
+        const high = Math.max(open, close) + randFactor(5);
+        const low = Math.min(open, close) - randFactor(5);
+        const time = Math.floor(Date.now() / 1000); // Use current time (needs adjustment for sequence)
+        return { time, open: Math.max(1, open), high: Math.max(1, high), low: Math.max(1, low), close: Math.max(1, close) }; // Ensure positive values
     }
 
     function initializeChart(container, dataArrayRef) {
-        if (!container || !LightweightCharts) return null; // Check if library loaded
+        if (!container || !LightweightCharts) { console.error("Chart container or library not found"); return null; }
 
-        const chart = LightweightCharts.createChart(container, {
-            width: container.clientWidth,
-            height: container.clientHeight,
-            layout: {
-                background: { color: 'rgba(0, 0, 0, 0)' }, // Transparent background
-                textColor: 'rgba(255, 255, 255, 0.7)', // Light text if needed
-            },
-            grid: { // Hide grid lines
-                vertLines: { color: 'rgba(0, 0, 0, 0)' },
-                horzLines: { color: 'rgba(0, 0, 0, 0)' },
-            },
-            crosshair: { mode: LightweightCharts.CrosshairMode.Hidden }, // Hide crosshair
-            timeScale: { visible: false }, // Hide time axis
-            priceScale: { visible: false }, // Hide price axis
-            handleScroll: false, // Disable user scroll/zoom
-            handleScale: false,
-        });
+        // Ensure container has dimensions for the chart library
+         if (container.clientHeight === 0 || container.clientWidth === 0) {
+            console.warn("Chart container has no dimensions yet.", container.id);
+             // You might need to explicitly set width/height via CSS or wait
+         }
+
+        const chartOptions = {
+            width: container.clientWidth || 200, // Use container size or default
+            height: container.clientHeight || 120,
+            layout: { background: { color: chartConfig.chartBackgroundColor }, textColor: chartConfig.textColor, },
+            grid: { vertLines: { visible: false }, horzLines: { visible: false }, },
+            crosshair: { mode: LightweightCharts.CrosshairMode.Hidden },
+            timeScale: { visible: false, fixLeftEdge: true, fixRightEdge: true, lockVisibleTimeRangeOnResize: true },
+            priceScale: { visible: false },
+            handleScroll: false, handleScale: false,
+        };
+        const chart = LightweightCharts.createChart(container, chartOptions);
 
         const candleSeries = chart.addCandlestickSeries({
-            upColor: neonViolet, // Violet for up candles
-            downColor: neonPurple, // Purple for down candles
+            upColor: chartConfig.neonViolet, downColor: chartConfig.neonPurple,
             borderVisible: false,
-            wickUpColor: neonViolet,
-            wickDownColor: neonPurple,
-            // Note: Direct neon glow is hard. Rely on CSS filter on container.
+            wickUpColor: chartConfig.neonViolet, wickDownColor: chartConfig.neonPurple,
         });
 
-        // Generate initial data
-        let lastClose = 50 + Math.random() * 20;
-        for (let i = 0; i < chartCandles; i++) {
-            const candle = generateRandomCandle(lastClose);
-            candle.time -= (chartCandles - 1 - i) * 3600; // Simulate past data points (1 hour apart)
+        // Generate initial smoothed historical data
+        let lastClose = chartConfig.priceMin + Math.random() * (chartConfig.priceMax - chartConfig.priceMin);
+        let currentTime = Math.floor(Date.now() / 1000) - (chartConfig.candlesToShow * 3600); // Start in the past
+        dataArrayRef.length = 0; // Clear existing data reference
+        for (let i = 0; i < chartConfig.candlesToShow; i++) {
+            const candle = generateRandomCandleData(lastClose);
+            candle.time = currentTime;
             dataArrayRef.push(candle);
             lastClose = candle.close;
+            currentTime += 3600; // Increment time for next candle
         }
         candleSeries.setData(dataArrayRef);
-        chart.timeScale().fitContent(); // Fit initial data
+        // chart.timeScale().fitContent(); // Fit initial data - might not be needed if fixed edges
 
+        console.log(`Chart initialized for ${container.id}`);
         return { chart, candleSeries };
     }
 
-    function updateChart(candleSeries, dataArray) {
-        if (!candleSeries || dataArray.length === 0) return;
+    function updateChart(chartInfo, dataArray) {
+        if (!chartInfo || !chartInfo.candleSeries || dataArray.length === 0) return;
 
         const lastCandle = dataArray[dataArray.length - 1];
-        const nextCandle = generateRandomCandle(lastCandle.close);
-         // Ensure time progresses
-         nextCandle.time = lastCandle.time + 3600; // Add an hour (or adjust for desired speed)
+        const nextCandle = generateRandomCandleData(lastCandle.close);
+        nextCandle.time = lastCandle.time + 3600; // Ensure time moves forward
 
-        dataArray.push(nextCandle);
-        candleSeries.update(nextCandle); // Update with the new candle
+        // Add new candle data using update (more efficient than setData)
+        chartInfo.candleSeries.update(nextCandle);
+        dataArray.push(nextCandle); // Keep our array in sync
 
-        // Optional: remove oldest candle if array grows too large (library might handle visible range)
-         if (dataArray.length > chartCandles + 50) { // Keep some buffer
+        // Remove oldest data point to maintain candle count
+        if (dataArray.length > chartConfig.candlesToShow + 5) { // Keep a small buffer
              dataArray.shift();
-             // Regenerate full data? Or library handles scroll? Let library handle for now.
-             // candleSeries.setData(dataArray); // Might cause flicker
-         }
+             // setData might be needed if library doesn't auto-scroll/prune old data well with fixed edges
+             // For now, assume update handles the visible range correctly
+        }
+
+        // Optional: Scroll to the newest candle if library doesn't do it automatically
+         chartInfo.chart.timeScale().scrollToPosition(-5, false); // Scroll slightly past the last bar
     }
 
     function startStockChartAnimation() {
+        // Stop existing intervals if re-initializing
+        if(stockIntervalLeft) clearInterval(stockIntervalLeft);
+        if(stockIntervalRight) clearInterval(stockIntervalRight);
+        currentDataLeft = []; // Reset data
+        currentDataRight = [];
+
         // Initialize Left Chart
         const initLeft = initializeChart(chartContainerLeft, currentDataLeft);
         if (initLeft) {
             chartLeft = initLeft.chart;
             candleSeriesLeft = initLeft.candleSeries;
-            stockIntervalLeft = setInterval(() => updateChart(candleSeriesLeft, currentDataLeft), 9000 / chartCandles); // ~9 sec loop / num candles
+            // Start update loop
+            stockIntervalLeft = setInterval(() => updateChart(initLeft, currentDataLeft), chartConfig.updateInterval);
         }
 
-        // Initialize Right Chart (with slight delay to appear different)
+        // Initialize Right Chart (with slight delay for visual difference)
          const initRight = initializeChart(chartContainerRight, currentDataRight);
          if (initRight) {
              chartRight = initRight.chart;
              candleSeriesRight = initRight.candleSeries;
              setTimeout(() => {
-                 stockIntervalRight = setInterval(() => updateChart(candleSeriesRight, currentDataRight), 9500 / chartCandles); // Slightly different timing
+                 stockIntervalRight = setInterval(() => updateChart(initRight, currentDataRight), chartConfig.updateInterval + 50); // Slightly different interval
              }, 500); // Delay start
          }
 
-         // Handle resize
+         // Handle resize - crucial for charts
          window.addEventListener('resize', () => {
-             if(chartLeft) chartLeft.resize(chartContainerLeft.clientWidth, chartContainerLeft.clientHeight);
-             if(chartRight) chartRight.resize(chartContainerRight.clientWidth, chartContainerRight.clientHeight);
+             if(chartLeft && chartContainerLeft) chartLeft.resize(chartContainerLeft.clientWidth, chartContainerLeft.clientHeight);
+             if(chartRight && chartContainerRight) chartRight.resize(chartContainerRight.clientWidth, chartContainerRight.clientHeight);
          });
+          console.log("Stock chart animations started.");
     }
     // --- Stock Chart Logic END ---
 

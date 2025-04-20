@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Stock Chart Elements & State ---
     const chartContainerLeft = document.getElementById('chart-container-left');
     const chartContainerRight = document.getElementById('chart-container-right');
-    console.log("Chart Containers Selected:", chartContainerLeft, chartContainerRight); // Check selection
+    console.log("Chart Containers Selected:", chartContainerLeft, chartContainerRight);
 
     let chartLeft = null; let candleSeriesLeft = null; let chartRight = null; let candleSeriesRight = null;
     let stockIntervalLeft = null; let stockIntervalRight = null;
@@ -34,14 +34,14 @@ document.addEventListener('DOMContentLoaded', () => {
         wickUpColor: '#ee82ee',
         wickDownColor: '#9d00ff',
         chartBackgroundColor: '#000000', // Black background
-        textColor: 'rgba(0, 0, 0, 0)' // Hidden text color
+        textColor: 'rgba(0, 0, 0, 0)' // Hidden text/labels
     };
 
     // --- Global State ---
     let visiblePopupForTilt = null; let lastTrailTime = 0; const trailInterval = 50;
 
     // --- Initial Setup ---
-    if (customCursor) { customCursor.textContent = '𖹭'; } // Set character cursor
+    if (customCursor) { customCursor.textContent = '𖹭'; }
     if (visitCountSpan) { let count = localStorage.getItem('pageVisits_worrySite') || 0; visitCountSpan.textContent = ++count; localStorage.setItem('pageVisits_worrySite', count); }
     const titles = ['m', 'me', 'mew', 'mewo', 'meow', 'meow .', 'meow ..', 'meow ...', 'meow ..', 'meow .']; let titleIndex = 0; setInterval(() => { document.title = titles[titleIndex]; titleIndex = (titleIndex + 1) % titles.length; }, 600);
 
@@ -49,8 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationString = "London, UK"; const typeSpeed = 180; const deleteSpeed = 120; const pauseDuration = 2500; let locationCharIndex = 0; let locationIsDeleting = false; let locationLoopTimeout;
     function typeDeleteLoop() { clearTimeout(locationLoopTimeout); const cursor = typingCursorElement; if (!locationTextElement || !cursor) return; if (!locationIsDeleting) { if (locationCharIndex < locationString.length) { const letterSpan = document.createElement('span'); letterSpan.textContent = locationString.charAt(locationCharIndex); locationTextElement.insertBefore(letterSpan, cursor); locationCharIndex++; locationLoopTimeout = setTimeout(typeDeleteLoop, typeSpeed); } else { locationIsDeleting = true; if (cursor) cursor.style.animationPlayState = 'paused'; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration); } } else { const letterSpans = locationTextElement.querySelectorAll('span:not(#typing-cursor)'); if (letterSpans.length > 0) { if (cursor) cursor.style.animationPlayState = 'running'; locationTextElement.removeChild(letterSpans[letterSpans.length - 1]); locationLoopTimeout = setTimeout(typeDeleteLoop, deleteSpeed); } else { locationIsDeleting = false; locationCharIndex = 0; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration / 2); } } }
 
+
     // --- Stock Chart Logic START ---
-    // Moved function definitions BEFORE they are called in Entry Screen Logic
+    // Moved function definitions BEFORE they are called
+
     function generateRandomCandleData(previousClose) { const randFactor = (max, min = 0) => Math.random() * (max - min) + min; const validPrevClose = (typeof previousClose === 'number' && !isNaN(previousClose)) ? previousClose : (chartConfig.priceMin + chartConfig.priceMax) / 2; let open = validPrevClose + randFactor(2, -2); let close = open + randFactor(8, -8); open = Math.max(chartConfig.priceMin * 0.8, Math.min(chartConfig.priceMax * 1.2, open)); close = Math.max(chartConfig.priceMin * 0.8, Math.min(chartConfig.priceMax * 1.2, close)); const high = Math.max(open, close) + randFactor(3); const low = Math.min(open, close) - randFactor(3); const time = Math.floor(Date.now() / 1000); return { time, open, high, low, close }; }
 
     function initializeChart(container, dataArrayRef) {
@@ -59,20 +61,20 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`Container ${container.id} dimensions: ${containerWidth}x${containerHeight}`); if (containerWidth === 0 || containerHeight === 0) { console.warn(`Container ${container.id} has zero dimensions.`); }
         container.innerHTML = '';
         console.log(`Attempting to create chart in: ${container.id}`);
-        // Updated Chart Options for black bg, no labels/axes
+        // Updated Chart Options
         const chartOptions = {
             width: containerWidth || 220, height: containerHeight || 140,
-            layout: { background: { color: chartConfig.chartBackgroundColor }, textColor: chartConfig.textColor, },
+            layout: { background: { color: chartConfig.chartBackgroundColor }, textColor: chartConfig.textColor, }, // Black BG, Hidden Text
             grid: { vertLines: { visible: false }, horzLines: { visible: false }, },
             crosshair: { mode: LightweightCharts.CrosshairMode.Hidden },
-            timeScale: { visible: false, borderVisible: false }, // Hide axis
-            priceScale: { visible: false, borderVisible: false }, // Hide axis
+            timeScale: { visible: false, borderVisible: false }, // Hide axes
+            priceScale: { visible: false, borderVisible: false },
             handleScroll: false, handleScale: false,
          };
         try {
             const chart = LightweightCharts.createChart(container, chartOptions);
             console.log(`Chart object created for ${container.id}:`); console.dir(chart);
-            if (!chart || typeof chart.addCandlestickSeries !== 'function') { console.error("CRITICAL ERROR: chart.addCandlestickSeries is NOT a function!", chart); return null; } // Safety check
+            if (!chart || typeof chart.addCandlestickSeries !== 'function') { console.error("CRITICAL ERROR: chart.addCandlestickSeries is NOT a function!", chart); return null; }
             // Updated Candle Colors
             const candleSeries = chart.addCandlestickSeries({ upColor: chartConfig.upColor, downColor: chartConfig.downColor, borderVisible: false, wickUpColor: chartConfig.upColor, wickDownColor: chartConfig.downColor });
             let lastClose = chartConfig.priceMin + Math.random() * (chartConfig.priceMax - chartConfig.priceMin); let currentTime = Math.floor(Date.now() / 1000) - (chartConfig.candlesToShow * 300); dataArrayRef.length = 0;
@@ -107,8 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
             backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); });
             updateVolumeUI();
             if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); }
-            // Initialize charts after a delay, ensuring functions are defined above
             console.log("Queueing stock chart initialization...");
+            // Initialize charts AFTER a delay
             setTimeout(() => { startStockChartAnimation(); }, 200);
         }, 500);
     }, { once: true });
@@ -116,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Cursor Tracking, Popup Tilt, Falling Trail ---
     document.addEventListener('mousemove', (e) => { if (customCursor) { customCursor.style.left = `${e.clientX}px`; customCursor.style.top = `${e.clientY}px`; } if(visiblePopupForTilt) { tiltPopup(e, visiblePopupForTilt); } const now = Date.now(); if (now - lastTrailTime > trailInterval) { createFallingTrailChar(e.clientX, e.clientY); lastTrailTime = now; } });
-    function createFallingTrailChar(x, y) { const trailEl = document.createElement('div'); trailEl.classList.add('trail-cursor-char'); trailEl.textContent = '𖹭'; trailEl.style.left = `${x}px`; trailEl.style.top = `${y}px`; document.body.appendChild(trailEl); setTimeout(() => { trailEl.remove(); }, 1200); } // Matches fall-fade-char animation duration
+    function createFallingTrailChar(x, y) { const trailEl = document.createElement('div'); trailEl.classList.add('trail-cursor-char'); trailEl.textContent = '𖹭'; trailEl.style.left = `${x}px`; trailEl.style.top = `${y}px`; document.body.appendChild(trailEl); setTimeout(() => { trailEl.remove(); }, 1000); } // Match fall animation
     function tiltPopup(e, popupElement) { const centerX = window.innerWidth / 2; const centerY = window.innerHeight / 2; const deltaX = e.clientX - centerX; const deltaY = e.clientY - centerY; const maxRotate = 15; const rotateY = -(deltaX / centerX) * maxRotate; const rotateX = (deltaY / centerY) * maxRotate; const clampedRotateX = Math.max(-maxRotate, Math.min(maxRotate, rotateX)); const clampedRotateY = Math.max(-maxRotate, Math.min(maxRotate, rotateY)); popupElement.style.transform = `translateX(-50%) rotateX(${clampedRotateX}deg) rotateY(${clampedRotateY}deg)`; }
     function resetPopupTilt(popupElement) { if(popupElement) { popupElement.style.transform = `translateX(-50%) rotateX(0deg) rotateY(0deg)`; } }
 
@@ -137,4 +139,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Close Popups when Clicking Outside Logic ---
     document.addEventListener('click', function(event) { let clickedInsideAnyPopup = false; allPopups.forEach(p => { if (p.contains(event.target)) { clickedInsideAnyPopup = true; } }); let clickedOnAnyTrigger = false; popupTriggers.forEach(t => { if (t.contains(event.target)) { clickedOnAnyTrigger = true; } }); const volumeControl = document.getElementById('volume-control-container'); const isClickInsideVolume = volumeControl ? volumeControl.contains(event.target) : false; if (!clickedInsideAnyPopup && !clickedOnAnyTrigger && !isClickInsideVolume) { closeAllPopups(); } });
 
-});
+}); // End of DOMContentLoaded

@@ -1,35 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM Loaded. Checking for LightweightCharts library...");
-    if (typeof LightweightCharts === 'undefined') {
-        console.error("CRITICAL: LightweightCharts object is UNDEFINED on DOMContentLoaded!");
-    } else {
-        console.log("LightweightCharts object found:", LightweightCharts);
-    }
+    if (typeof LightweightCharts === 'undefined') { console.error("CRITICAL: LightweightCharts object is UNDEFINED!"); } else { console.log("LightweightCharts object found:", LightweightCharts); }
 
     // --- Standard Elements ---
-    const entryScreen = document.getElementById('entry-screen');
-    const mainContent = document.getElementById('main-content');
-    const backgroundMusic = document.getElementById('background-music');
-    const customCursor = document.getElementById('custom-cursor');
-    const popupTriggers = document.querySelectorAll('.popup-trigger');
-    const allPopups = document.querySelectorAll('.popup-menu');
-    const visitCountSpan = document.getElementById('visit-count');
-    const volumeContainer = document.getElementById('volume-control-container');
-    const muteButton = document.getElementById('mute-button');
-    const volumeIcon = document.getElementById('volume-icon');
-    const volumeSlider = document.getElementById('volume-slider');
-    const locationTextElement = document.getElementById('location-text');
-    const typingCursorElement = document.getElementById('typing-cursor');
+    const entryScreen = document.getElementById('entry-screen'); const mainContent = document.getElementById('main-content'); const backgroundMusic = document.getElementById('background-music'); const customCursor = document.getElementById('custom-cursor'); const popupTriggers = document.querySelectorAll('.popup-trigger'); const allPopups = document.querySelectorAll('.popup-menu'); const visitCountSpan = document.getElementById('visit-count'); const volumeContainer = document.getElementById('volume-control-container'); const muteButton = document.getElementById('mute-button'); const volumeIcon = document.getElementById('volume-icon'); const volumeSlider = document.getElementById('volume-slider'); const locationTextElement = document.getElementById('location-text'); const typingCursorElement = document.getElementById('typing-cursor');
 
     // --- Stock Chart Elements & State ---
-    const chartContainerLeft = document.getElementById('chart-container-left');
-    const chartContainerRight = document.getElementById('chart-container-right');
-    console.log("Chart Containers Selected:", chartContainerLeft, chartContainerRight);
-
-    let chartLeft = null; let candleSeriesLeft = null; let chartRight = null; let candleSeriesRight = null;
-    let stockIntervalLeft = null; let stockIntervalRight = null;
-    let currentDataLeft = []; let currentDataRight = [];
-    const chartConfig = { candlesToShow: 30, updateInterval: 300, priceMin: 40, priceMax: 100, neonViolet: '#ee82ee', neonPurple: '#9d00ff', chartBackgroundColor: 'rgba(0, 0, 0, 0)', textColor: 'rgba(200, 200, 200, 0.1)' };
+    const chartContainerLeft = document.getElementById('chart-container-left'); const chartContainerRight = document.getElementById('chart-container-right'); console.log("Chart Containers Selected:", chartContainerLeft, chartContainerRight);
+    let chartLeft = null; let candleSeriesLeft = null; let chartRight = null; let candleSeriesRight = null; let stockIntervalLeft = null; let stockIntervalRight = null; let currentDataLeft = []; let currentDataRight = [];
+    const chartConfig = { candlesToShow: 30, updateInterval: 300, priceMin: 40, priceMax: 100,
+         // Using standard colors for debugging
+         upColor: '#26a69a', // Greenish
+         downColor: '#ef5350', // Reddish
+        chartBackgroundColor: 'rgba(30, 30, 30, 0.8)', // Semi-opaque dark background
+        textColor: 'rgba(200, 200, 200, 0.7)' // Visible text color
+    };
 
     // --- Global State ---
     let visiblePopupForTilt = null; let lastTrailTime = 0; const trailInterval = 50;
@@ -44,27 +29,55 @@ document.addEventListener('DOMContentLoaded', () => {
     function typeDeleteLoop() { clearTimeout(locationLoopTimeout); const cursor = typingCursorElement; if (!locationTextElement || !cursor) return; if (!locationIsDeleting) { if (locationCharIndex < locationString.length) { const letterSpan = document.createElement('span'); letterSpan.textContent = locationString.charAt(locationCharIndex); locationTextElement.insertBefore(letterSpan, cursor); locationCharIndex++; locationLoopTimeout = setTimeout(typeDeleteLoop, typeSpeed); } else { locationIsDeleting = true; if (cursor) cursor.style.animationPlayState = 'paused'; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration); } } else { const letterSpans = locationTextElement.querySelectorAll('span:not(#typing-cursor)'); if (letterSpans.length > 0) { if (cursor) cursor.style.animationPlayState = 'running'; locationTextElement.removeChild(letterSpans[letterSpans.length - 1]); locationLoopTimeout = setTimeout(typeDeleteLoop, deleteSpeed); } else { locationIsDeleting = false; locationCharIndex = 0; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration / 2); } } }
 
     // --- Stock Chart Logic START ---
-    // Moved function definitions BEFORE they are called
     function generateRandomCandleData(previousClose) { const randFactor = (max, min = 0) => Math.random() * (max - min) + min; const validPrevClose = (typeof previousClose === 'number' && !isNaN(previousClose)) ? previousClose : (chartConfig.priceMin + chartConfig.priceMax) / 2; let open = validPrevClose + randFactor(2, -2); let close = open + randFactor(8, -8); open = Math.max(chartConfig.priceMin * 0.8, Math.min(chartConfig.priceMax * 1.2, open)); close = Math.max(chartConfig.priceMin * 0.8, Math.min(chartConfig.priceMax * 1.2, close)); const high = Math.max(open, close) + randFactor(3); const low = Math.min(open, close) - randFactor(3); const time = Math.floor(Date.now() / 1000); return { time, open, high, low, close }; }
 
     function initializeChart(container, dataArrayRef) {
         if (typeof LightweightCharts === 'undefined' || !container) { console.error("ERROR: LightweightCharts library or container not ready!", container?.id); return null; }
         const containerWidth = container.clientWidth; const containerHeight = container.clientHeight;
-        console.log(`Container ${container.id} dimensions: ${containerWidth}x${containerHeight}`);
-        if (containerWidth === 0 || containerHeight === 0) { console.warn(`Container ${container.id} has zero dimensions. Chart may not initialize correctly.`); }
+         console.log(`Container ${container.id} dimensions: ${containerWidth}x${containerHeight}`);
+         if (containerWidth === 0 || containerHeight === 0) { console.warn(`Container ${container.id} has zero dimensions. Chart may not initialize correctly.`); }
         container.innerHTML = '';
         console.log(`Attempting to create chart in: ${container.id}`);
-        const chartOptions = { width: containerWidth || 220, height: containerHeight || 140, layout: { background: { color: chartConfig.chartBackgroundColor }, textColor: chartConfig.textColor, }, grid: { vertLines: { visible: false }, horzLines: { visible: false }, }, crosshair: { mode: LightweightCharts.CrosshairMode.Hidden }, timeScale: { visible: false, fixLeftEdge: true, fixRightEdge: true, lockVisibleTimeRangeOnResize: true, borderVisible: false }, priceScale: { visible: false, borderVisible: false }, handleScroll: false, handleScale: false, };
+
+        // Simplified Options for Debugging
+        const chartOptions = {
+            width: containerWidth || 220, height: containerHeight || 140,
+            layout: {
+                background: { color: chartConfig.chartBackgroundColor }, // Dark BG
+                textColor: chartConfig.textColor,
+            },
+            grid: { // Keep grid invisible
+                vertLines: { visible: false },
+                horzLines: { visible: false },
+            },
+            crosshair: { mode: LightweightCharts.CrosshairMode.Hidden },
+            // Make time and price scales VISIBLE for debugging
+            timeScale: { visible: true, borderVisible: true },
+            priceScale: { visible: true, borderVisible: true },
+            handleScroll: false, handleScale: false,
+        };
+
         try {
             const chart = LightweightCharts.createChart(container, chartOptions);
-            console.log(`Chart object created for ${container.id}:`); console.dir(chart); // Log the object itself
-            if (!chart || typeof chart.addCandlestickSeries !== 'function') { console.error("CRITICAL ERROR: chart.addCandlestickSeries is NOT a function!", chart); return null; } // Check added previously
-            const candleSeries = chart.addCandlestickSeries({ upColor: chartConfig.neonViolet, downColor: chartConfig.neonPurple, borderVisible: false, wickUpColor: chartConfig.neonViolet, wickDownColor: chartConfig.neonPurple, });
+            console.log(`Chart object created for ${container.id}:`); console.dir(chart);
+            if (!chart || typeof chart.addCandlestickSeries !== 'function') { console.error("CRITICAL ERROR: chart.addCandlestickSeries is NOT a function!", chart); return null; }
+
+            // Use basic colors for debugging
+            const candleSeries = chart.addCandlestickSeries({
+                 upColor: chartConfig.upColor, // Default green
+                 downColor: chartConfig.downColor, // Default red
+                 borderVisible: false,
+                 wickUpColor: chartConfig.upColor,
+                 wickDownColor: chartConfig.downColor,
+            });
+
             let lastClose = chartConfig.priceMin + Math.random() * (chartConfig.priceMax - chartConfig.priceMin); let currentTime = Math.floor(Date.now() / 1000) - (chartConfig.candlesToShow * 300); dataArrayRef.length = 0;
             for (let i = 0; i < chartConfig.candlesToShow; i++) { const candle = generateRandomCandleData(lastClose); candle.time = currentTime; dataArrayRef.push(candle); lastClose = candle.close; currentTime += 300; }
             candleSeries.setData(dataArrayRef);
+
             console.log(`Chart initialized successfully for ${container.id}`);
             return { chart, candleSeries };
+
         } catch (error) { console.error(`Error during chart initialization for ${container.id}:`, error); return null; }
     }
 
@@ -82,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Entry Screen Logic ---
-    // Calls startStockChartAnimation which is now defined above
     entryScreen.addEventListener('click', () => {
         console.log("Entry screen clicked!");
         entryScreen.classList.add('hidden');
@@ -93,8 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
             backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); });
             updateVolumeUI();
             if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); }
-            console.log("Queueing stock chart initialization...");
-            setTimeout(() => { startStockChartAnimation(); }, 200); // Delay initialization slightly
+            console.log("Queueing stock chart initialization with longer delay...");
+            setTimeout(() => { startStockChartAnimation(); }, 200); // Increased delay
         }, 500);
     }, { once: true });
 
@@ -122,4 +134,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Close Popups when Clicking Outside Logic ---
     document.addEventListener('click', function(event) { let clickedInsideAnyPopup = false; allPopups.forEach(p => { if (p.contains(event.target)) { clickedInsideAnyPopup = true; } }); let clickedOnAnyTrigger = false; popupTriggers.forEach(t => { if (t.contains(event.target)) { clickedOnAnyTrigger = true; } }); const volumeControl = document.getElementById('volume-control-container'); const isClickInsideVolume = volumeControl ? volumeControl.contains(event.target) : false; if (!clickedInsideAnyPopup && !clickedOnAnyTrigger && !isClickInsideVolume) { closeAllPopups(); } });
 
-}); // <<< Ensure this final brace closes the DOMContentLoaded listener
+});

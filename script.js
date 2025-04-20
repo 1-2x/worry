@@ -1,26 +1,48 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM Loaded. Checking for LightweightCharts library...");
-    if (typeof LightweightCharts === 'undefined') { console.error("CRITICAL: LightweightCharts object is UNDEFINED!"); } else { console.log("LightweightCharts object found:", LightweightCharts); }
+    if (typeof LightweightCharts === 'undefined') { console.error("CRITICAL: LightweightCharts object is UNDEFINED!"); }
+    else { console.log("LightweightCharts object found:", LightweightCharts); }
 
     // --- Standard Elements ---
-    const entryScreen = document.getElementById('entry-screen'); const mainContent = document.getElementById('main-content'); const backgroundMusic = document.getElementById('background-music'); const customCursor = document.getElementById('custom-cursor'); const popupTriggers = document.querySelectorAll('.popup-trigger'); const allPopups = document.querySelectorAll('.popup-menu'); const visitCountSpan = document.getElementById('visit-count'); const volumeContainer = document.getElementById('volume-control-container'); const muteButton = document.getElementById('mute-button'); const volumeIcon = document.getElementById('volume-icon'); const volumeSlider = document.getElementById('volume-slider'); const locationTextElement = document.getElementById('location-text'); const typingCursorElement = document.getElementById('typing-cursor');
+    const entryScreen = document.getElementById('entry-screen');
+    const mainContent = document.getElementById('main-content');
+    const backgroundMusic = document.getElementById('background-music');
+    const customCursor = document.getElementById('custom-cursor');
+    const popupTriggers = document.querySelectorAll('.popup-trigger');
+    const allPopups = document.querySelectorAll('.popup-menu');
+    const visitCountSpan = document.getElementById('visit-count');
+    const volumeContainer = document.getElementById('volume-control-container');
+    const muteButton = document.getElementById('mute-button');
+    const volumeIcon = document.getElementById('volume-icon');
+    const volumeSlider = document.getElementById('volume-slider');
+    const locationTextElement = document.getElementById('location-text');
+    const typingCursorElement = document.getElementById('typing-cursor');
 
     // --- Stock Chart Elements & State ---
-    const chartContainerLeft = document.getElementById('chart-container-left'); const chartContainerRight = document.getElementById('chart-container-right'); console.log("Chart Containers Selected:", chartContainerLeft, chartContainerRight);
-    let chartLeft = null; let candleSeriesLeft = null; let chartRight = null; let candleSeriesRight = null; let stockIntervalLeft = null; let stockIntervalRight = null; let currentDataLeft = []; let currentDataRight = [];
-    const chartConfig = { candlesToShow: 30, updateInterval: 300, priceMin: 40, priceMax: 100,
-         // Using standard colors for debugging
-         upColor: '#26a69a', // Greenish
-         downColor: '#ef5350', // Reddish
-        chartBackgroundColor: 'rgba(30, 30, 30, 0.8)', // Semi-opaque dark background
-        textColor: 'rgba(200, 200, 200, 0.7)' // Visible text color
+    const chartContainerLeft = document.getElementById('chart-container-left');
+    const chartContainerRight = document.getElementById('chart-container-right');
+    console.log("Chart Containers Selected:", chartContainerLeft, chartContainerRight);
+
+    let chartLeft = null; let candleSeriesLeft = null; let chartRight = null; let candleSeriesRight = null;
+    let stockIntervalLeft = null; let stockIntervalRight = null;
+    let currentDataLeft = []; let currentDataRight = [];
+    // Updated chart config
+    const chartConfig = {
+        candlesToShow: 30, updateInterval: 300, // ~9 second loop (30 * 300ms)
+        priceMin: 40, priceMax: 100,
+        upColor: '#ee82ee', // Neon Violet
+        downColor: '#9d00ff', // Neon Purple
+        wickUpColor: '#ee82ee', // Neon Violet
+        wickDownColor: '#9d00ff', // Neon Purple
+        chartBackgroundColor: '#000000', // Black background
+        textColor: 'rgba(0, 0, 0, 0)' // Hide text by making transparent
     };
 
     // --- Global State ---
     let visiblePopupForTilt = null; let lastTrailTime = 0; const trailInterval = 50;
 
     // --- Initial Setup ---
-    if (customCursor) { customCursor.textContent = '𖹭'; }
+    if (customCursor) { customCursor.textContent = '𖹭'; } // Set character cursor
     if (visitCountSpan) { let count = localStorage.getItem('pageVisits_worrySite') || 0; visitCountSpan.textContent = ++count; localStorage.setItem('pageVisits_worrySite', count); }
     const titles = ['m', 'me', 'mew', 'mewo', 'meow', 'meow .', 'meow ..', 'meow ...', 'meow ..', 'meow .']; let titleIndex = 0; setInterval(() => { document.title = titles[titleIndex]; titleIndex = (titleIndex + 1) % titles.length; }, 600);
 
@@ -29,31 +51,25 @@ document.addEventListener('DOMContentLoaded', () => {
     function typeDeleteLoop() { clearTimeout(locationLoopTimeout); const cursor = typingCursorElement; if (!locationTextElement || !cursor) return; if (!locationIsDeleting) { if (locationCharIndex < locationString.length) { const letterSpan = document.createElement('span'); letterSpan.textContent = locationString.charAt(locationCharIndex); locationTextElement.insertBefore(letterSpan, cursor); locationCharIndex++; locationLoopTimeout = setTimeout(typeDeleteLoop, typeSpeed); } else { locationIsDeleting = true; if (cursor) cursor.style.animationPlayState = 'paused'; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration); } } else { const letterSpans = locationTextElement.querySelectorAll('span:not(#typing-cursor)'); if (letterSpans.length > 0) { if (cursor) cursor.style.animationPlayState = 'running'; locationTextElement.removeChild(letterSpans[letterSpans.length - 1]); locationLoopTimeout = setTimeout(typeDeleteLoop, deleteSpeed); } else { locationIsDeleting = false; locationCharIndex = 0; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration / 2); } } }
 
     // --- Stock Chart Logic START ---
+    // Moved function definitions BEFORE they are called
     function generateRandomCandleData(previousClose) { const randFactor = (max, min = 0) => Math.random() * (max - min) + min; const validPrevClose = (typeof previousClose === 'number' && !isNaN(previousClose)) ? previousClose : (chartConfig.priceMin + chartConfig.priceMax) / 2; let open = validPrevClose + randFactor(2, -2); let close = open + randFactor(8, -8); open = Math.max(chartConfig.priceMin * 0.8, Math.min(chartConfig.priceMax * 1.2, open)); close = Math.max(chartConfig.priceMin * 0.8, Math.min(chartConfig.priceMax * 1.2, close)); const high = Math.max(open, close) + randFactor(3); const low = Math.min(open, close) - randFactor(3); const time = Math.floor(Date.now() / 1000); return { time, open, high, low, close }; }
 
     function initializeChart(container, dataArrayRef) {
         if (typeof LightweightCharts === 'undefined' || !container) { console.error("ERROR: LightweightCharts library or container not ready!", container?.id); return null; }
         const containerWidth = container.clientWidth; const containerHeight = container.clientHeight;
          console.log(`Container ${container.id} dimensions: ${containerWidth}x${containerHeight}`);
-         if (containerWidth === 0 || containerHeight === 0) { console.warn(`Container ${container.id} has zero dimensions. Chart may not initialize correctly.`); }
+         if (containerWidth === 0 || containerHeight === 0) { console.warn(`Container ${container.id} has zero dimensions.`); }
         container.innerHTML = '';
         console.log(`Attempting to create chart in: ${container.id}`);
 
-        // Simplified Options for Debugging
+        // Updated Chart Options
         const chartOptions = {
             width: containerWidth || 220, height: containerHeight || 140,
-            layout: {
-                background: { color: chartConfig.chartBackgroundColor }, // Dark BG
-                textColor: chartConfig.textColor,
-            },
-            grid: { // Keep grid invisible
-                vertLines: { visible: false },
-                horzLines: { visible: false },
-            },
+            layout: { background: { color: chartConfig.chartBackgroundColor }, textColor: chartConfig.textColor, }, // Black BG, Hidden Text
+            grid: { vertLines: { visible: false }, horzLines: { visible: false }, },
             crosshair: { mode: LightweightCharts.CrosshairMode.Hidden },
-            // Make time and price scales VISIBLE for debugging
-            timeScale: { visible: true, borderVisible: true },
-            priceScale: { visible: true, borderVisible: true },
+            timeScale: { visible: false, borderVisible: false }, // Hide time axis
+            priceScale: { visible: false, borderVisible: false }, // Hide price axis
             handleScroll: false, handleScale: false,
         };
 
@@ -62,18 +78,19 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`Chart object created for ${container.id}:`); console.dir(chart);
             if (!chart || typeof chart.addCandlestickSeries !== 'function') { console.error("CRITICAL ERROR: chart.addCandlestickSeries is NOT a function!", chart); return null; }
 
-            // Use basic colors for debugging
+            // Updated Candle Colors
             const candleSeries = chart.addCandlestickSeries({
-                 upColor: chartConfig.upColor, // Default green
-                 downColor: chartConfig.downColor, // Default red
+                 upColor: chartConfig.neonViolet, // Violet for up
+                 downColor: chartConfig.neonPurple, // Purple for down
                  borderVisible: false,
-                 wickUpColor: chartConfig.upColor,
-                 wickDownColor: chartConfig.downColor,
+                 wickUpColor: chartConfig.neonViolet,
+                 wickDownColor: chartConfig.neonPurple,
             });
 
             let lastClose = chartConfig.priceMin + Math.random() * (chartConfig.priceMax - chartConfig.priceMin); let currentTime = Math.floor(Date.now() / 1000) - (chartConfig.candlesToShow * 300); dataArrayRef.length = 0;
             for (let i = 0; i < chartConfig.candlesToShow; i++) { const candle = generateRandomCandleData(lastClose); candle.time = currentTime; dataArrayRef.push(candle); lastClose = candle.close; currentTime += 300; }
             candleSeries.setData(dataArrayRef);
+            // Apply neon glow via filter on the container in CSS is easier
 
             console.log(`Chart initialized successfully for ${container.id}`);
             return { chart, candleSeries };
@@ -81,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error(`Error during chart initialization for ${container.id}:`, error); return null; }
     }
 
-    function updateChart(chartInfo, dataArray) { if (!chartInfo || !chartInfo.candleSeries || dataArray.length === 0) return; const lastCandle = dataArray[dataArray.length - 1]; const nextCandle = generateRandomCandleData(lastCandle.close); nextCandle.time = lastCandle.time + 300; try { chartInfo.candleSeries.update(nextCandle); dataArray.push(nextCandle); if (dataArray.length > chartConfig.candlesToShow * 2) { dataArray.shift(); } chartInfo.chart.timeScale().scrollToPosition(-1, false); } catch(error) { console.error("Error updating chart:", error); } }
+    function updateChart(chartInfo, dataArray) { if (!chartInfo || !chartInfo.candleSeries || dataArray.length === 0) return; const lastCandle = dataArray[dataArray.length - 1]; const nextCandle = generateRandomCandleData(lastCandle.close); nextCandle.time = lastCandle.time + 300; try { chartInfo.candleSeries.update(nextCandle); dataArray.push(nextCandle); if (dataArray.length > chartConfig.candlesToShow * 2) { dataArray.shift(); } chartInfo.chart.timeScale().scrollToRealTime(); } catch(error) { console.error("Error updating chart:", error); } }
 
     function startStockChartAnimation() {
         console.log("Attempting to start stock chart animations...");
@@ -105,8 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
             backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); });
             updateVolumeUI();
             if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); }
-            console.log("Queueing stock chart initialization with longer delay...");
-            setTimeout(() => { startStockChartAnimation(); }, 200); // Increased delay
+            console.log("Queueing stock chart initialization...");
+            setTimeout(() => { startStockChartAnimation(); }, 200); // Delay initialization
         }, 500);
     }, { once: true });
 

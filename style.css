@@ -35,7 +35,7 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 /* .faith-title rule REMOVED */
 
 /* Icon Links */
-.icon-links { margin-top: 20px; /* Add space now title is gone */ margin-bottom: 2rem; position: relative; }
+.icon-links { margin-top: 20px; margin-bottom: 2rem; position: relative; }
 .icon-links a.icon-link { color: #ff00ff; text-decoration: none; font-size: 2rem; margin: 0 0.75rem; transition: color 0.3s, text-shadow 0.3s; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; animation: color-change-icons 6s linear infinite; display: inline-block; }
 .icon-links a.popup-trigger { animation: color-change-icons 6s linear infinite; }
 .icon-links a i { display: block; }
@@ -53,7 +53,8 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 .popup-link:hover .popup-icon.fa-tiktok { color: #EE1D52; }
 .popup-text { font-size: 0.9rem; font-family: 'Courier New', Courier, monospace; }
 .multicolor-neon span { display: inline-block; animation: multicolor-letter-glow 5s linear infinite; text-shadow: 0 0 2px currentColor, 0 0 4px currentColor; }
-.multicolor-neon span:nth-child(1) { animation-delay: 0.0s; } .multicolor-neon span:nth-child(2) { animation-delay: 0.2s; } .multicolor-neon span:nth-child(3) { animation-delay: 0.4s; } .multicolor-neon span:nth-child(4) { animation-delay: 0.6s; } .multicolor-neon span:nth-child(5) { animation-delay: 0.8s; } .multicolor-neon span:nth-child(6) { animation-delay: 1.0s; } .multicolor-neon span:nth-child(7) { animation-delay: 1.2s; } .multicolor-neon span:nth-child(8) { animation-delay: 1.4s; } .multicolor-neon span:nth-child(9) { animation-delay: 1.6s; }
+.multicolor-neon span:nth-child(1) { animation-delay: 0.0s; } /* Add more nth-child delays if needed */
+.multicolor-neon span:nth-child(2) { animation-delay: 0.2s; } .multicolor-neon span:nth-child(3) { animation-delay: 0.4s; } .multicolor-neon span:nth-child(4) { animation-delay: 0.6s; } .multicolor-neon span:nth-child(5) { animation-delay: 0.8s; } .multicolor-neon span:nth-child(6) { animation-delay: 1.0s; } .multicolor-neon span:nth-child(7) { animation-delay: 1.2s; } .multicolor-neon span:nth-child(8) { animation-delay: 1.4s; } .multicolor-neon span:nth-child(9) { animation-delay: 1.6s; }
 @keyframes multicolor-letter-glow { 0% { color: #ff0000; } 20% { color: #9d00ff; } 40% { color: #0000ff; } 60% { color: #ff00ff; } 80% { color: #00ffff; } 100% { color: #ff0000; } }
 
 /* Fake View Counter Area */
@@ -62,8 +63,6 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 #visit-count { font-size: 0.8rem; color: white; font-family: 'Courier New', Courier, monospace; min-width: 10px; animation: counter-color-change 5s linear infinite alternate; text-shadow: 0 0 3px currentColor, 0 0 6px currentColor; }
 @keyframes color-change-eye { 0% { color: #ff0000; } 100% { color: #9d00ff; } }
 @keyframes counter-color-change { 0%, 100% { color: #ff00ff; } 50% { color: #9d00ff; } }
-
-/* Footer Credit Link REMOVED */
 
 /* --- Volume Control --- */
 #volume-control-container { position: fixed; top: 15px; left: 15px; background-color: rgba(40, 30, 50, 0.6); border-radius: 25px; padding: 5px; display: flex; align-items: center; z-index: 1100; backdrop-filter: blur(3px); border: 1px solid rgba(255, 255, 255, 0.1); opacity: 0; visibility: hidden; transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.9s; }
@@ -82,11 +81,11 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 /* --- Custom Cursor (Reverted to 𖹭) --- */
 #custom-cursor { position: fixed; pointer-events: none; z-index: 9999; left: -100px; top: -100px; font-size: 2rem; line-height: 1; text-align: center; background-color: transparent; animation: cursor-color-change-text 4s linear infinite; width: auto; height: auto; transform: translate(-50%, -50%); }
 #custom-cursor::before, #custom-cursor::after { content: none; }
-@keyframes cursor-color-change-text { 0% { color: #ff00ff; } 33% { color: #9d00ff; } 66% { color: #ff0033; } 100% { color: #ff00ff; } }
+@keyframes cursor-color-change-text { 0% { color: #ff00ff; } 33% { color: #9d00ff; } 66% { color: #ff0033; } 100% { color: #ff00ff; } } /* Animates text color */
 
 /* --- Falling Character Trail START --- */
 .trail-cursor-char { position: fixed; pointer-events: none; z-index: 9998; opacity: 1; font-size: 1.5rem; line-height: 1; transform: translate(-50%, -50%); animation: cursor-color-change-text 4s linear infinite, fall-fade-char 1.2s linear forwards; }
-@keyframes fall-fade-char { 0% { transform: translate(-50%, -50%) translateY(0); opacity: 1; } 100% { transform: translate(-50%, -50%) translateY(30vh); opacity: 0; } }
+@keyframes fall-fade-char { 0% { transform: translate(-50%, -50%) translateY(0); opacity: 1; } 100% { transform: translate(-50%, -50%) translateY(40vh); opacity: 0; } } /* Adjusted fall distance */
 /* --- Falling Character Trail END --- */
 
 /* --- Stock Chart Styles START --- */
@@ -94,15 +93,17 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
     position: fixed;
     top: 50%;
     transform: translateY(-50%);
-    width: 200px; /* Adjusted size */
-    height: 120px; /* Adjusted size */
-    z-index: 5;
+    width: 200px; /* Adjust size as needed */
+    height: 120px;
+    z-index: 5; /* Below most UI */
     opacity: 0; /* Hidden initially */
-    transition: opacity 0.5s ease 1s; /* Fade in after main content */
-    filter: drop-shadow(0 0 5px rgba(157, 0, 255, 0.5)); /* Neon glow */
+    transition: opacity 0.5s ease 1s; /* Fade in after delay */
+    filter: drop-shadow(0 0 6px rgba(157, 0, 255, 0.6)); /* Neon glow */
+    border: 1px solid rgba(157, 0, 255, 0.2); /* Faint border */
+    background-color: rgba(10, 0, 20, 0.1); /* Very faint bg */
 }
 #main-content.visible .chart-container {
-    opacity: 0.8; /* Slightly transparent */
+    opacity: 0.85; /* Make slightly transparent when visible */
 }
 #chart-container-left { left: 20px; }
 #chart-container-right { right: 20px; }

@@ -9,8 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const visitCountSpan = document.getElementById('visit-count');
     const discordTrigger = document.getElementById('discord-pop-trigger');
     const discordPopup = document.getElementById('discord-popup');
-
-    // Volume Control Elements
+    const volumeContainer = document.getElementById('volume-control-container'); // Select volume container
     const muteButton = document.getElementById('mute-button');
     const volumeIcon = document.getElementById('volume-icon');
     const volumeSlider = document.getElementById('volume-slider');
@@ -47,14 +46,17 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             entryScreen.style.display = 'none';
             mainContent.classList.add('visible');
+            // Make volume control visible AFTER main content starts showing
+            if (volumeContainer) {
+                 volumeContainer.classList.add('visible');
+            }
             // Attempt to play music immediately
             backgroundMusic.play().catch(error => {
                 console.warn("Background music autoplay failed initially.", error);
-                // If autoplay fails, user interaction (like adjusting volume) might start it
             });
-            // Set initial volume UI state AFTER trying to play
+            // Set initial volume UI state
              updateVolumeUI();
-        }, 500);
+        }, 500); // Timeout matches entry screen fade
     }, { once: true });
 
     // --- Custom Cursor Tracking and Trail ---
@@ -79,57 +81,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
      // --- Volume Control Logic START ---
      function updateVolumeUI() {
-        if (!backgroundMusic || !volumeIcon || !volumeSlider) return; // Ensure elements exist
+        if (!backgroundMusic || !volumeIcon || !volumeSlider) return;
 
+        // Update slider value first (reflects current volume unless muted)
+        volumeSlider.value = backgroundMusic.muted ? 0 : backgroundMusic.volume;
+
+        // Update icon based on mute status and volume level
         if (backgroundMusic.muted) {
-            volumeIcon.classList.remove('fa-volume-high', 'fa-volume-low', 'fa-volume-off');
-            volumeIcon.classList.add('fa-volume-xmark'); // Mute icon
-            volumeSlider.value = 0; // Show slider at zero when muted
+            volumeIcon.className = 'fa-solid fa-volume-xmark'; // Set class directly
+        } else if (backgroundMusic.volume === 0) {
+             volumeIcon.className = 'fa-solid fa-volume-off';
+        } else if (backgroundMusic.volume <= 0.5) {
+            volumeIcon.className = 'fa-solid fa-volume-low';
         } else {
-            volumeIcon.classList.remove('fa-volume-xmark'); // Remove mute icon class
-            if (backgroundMusic.volume === 0) {
-                volumeIcon.classList.remove('fa-volume-high', 'fa-volume-low');
-                volumeIcon.classList.add('fa-volume-off');
-            } else if (backgroundMusic.volume <= 0.5) {
-                volumeIcon.classList.remove('fa-volume-high', 'fa-volume-off');
-                volumeIcon.classList.add('fa-volume-low');
-            } else {
-                volumeIcon.classList.remove('fa-volume-low', 'fa-volume-off');
-                volumeIcon.classList.add('fa-volume-high');
-            }
-            volumeSlider.value = backgroundMusic.volume; // Reflect actual volume
+             volumeIcon.className = 'fa-solid fa-volume-high';
         }
+        // Add back base class if removed by className assignment
+        volumeIcon.classList.add('fa-solid');
     }
+
 
     // Mute Button Click
     if (muteButton) {
         muteButton.addEventListener('click', () => {
             if (!backgroundMusic) return;
             backgroundMusic.muted = !backgroundMusic.muted;
+             // If unmuting and volume was 0, set volume slightly above 0
+             if (!backgroundMusic.muted && backgroundMusic.volume === 0) {
+                 backgroundMusic.volume = 0.1; // Set to a low volume instead of 0
+             }
             updateVolumeUI();
         });
     }
 
     // Volume Slider Input Change
     if (volumeSlider) {
-        volumeSlider.addEventListener('input', function() { // Use 'input' for real-time update
+        volumeSlider.addEventListener('input', function() {
             if (!backgroundMusic) return;
-            backgroundMusic.volume = this.value;
-            // Unmute if user manually adjusts volume slider away from 0
-             if (this.value > 0) {
-                 backgroundMusic.muted = false;
-             } else {
-                 // Optional: you might want mute to persist even if slider is at 0
-                 // If slider hits 0, set volume but don't necessarily mute? Or do mute?
-                 // Let's set muted if volume is 0 via slider.
-                 backgroundMusic.muted = (this.value == 0);
-             }
+            backgroundMusic.volume = parseFloat(this.value); // Ensure value is float
+            // If user interacts with slider, always unmute unless they slide to 0
+            backgroundMusic.muted = (backgroundMusic.volume === 0);
             updateVolumeUI();
         });
     }
 
-     // Initial UI setup (call after a short delay to ensure audio properties are readable)
-     setTimeout(updateVolumeUI, 100);
+     // Initial UI setup needs audio metadata loaded potentially, but we can try early
+     updateVolumeUI(); // Set initial state based on defaults
+     // Event listener in case properties change later (e.g. ended, or external control)
+     if (backgroundMusic) {
+        backgroundMusic.addEventListener('volumechange', updateVolumeUI);
+     }
     // --- Volume Control Logic END ---
 
 
@@ -158,13 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (discordPopup && discordTrigger) {
             const isClickInsidePopup = discordPopup.contains(event.target);
             const isClickOnTrigger = discordTrigger.contains(event.target);
-            // Also check if click is inside the volume control
             const volumeControl = document.getElementById('volume-control-container');
             const isClickInsideVolume = volumeControl ? volumeControl.contains(event.target) : false;
 
-
-            // Close popup if click is outside popup AND outside trigger
-            // Let clicks inside volume control pass through without closing popup
             if (discordPopup.classList.contains('visible') && !isClickInsidePopup && !isClickOnTrigger && !isClickInsideVolume) {
                  discordPopup.classList.remove('visible');
             }

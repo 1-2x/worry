@@ -11,8 +11,8 @@
 <body>
     <div id="custom-cursor"></div>
 
-    <div id="chart-container-left" class="chart-container"></div>
-    <div id="chart-container-right" class="chart-container"></div>
+    <canvas id="stock-chart-left" class="stock-chart"></canvas>
+    <canvas id="stock-chart-right" class="stock-chart"></canvas>
 
     <div id="entry-screen">
         <p>Click to Enter</p>
@@ -24,14 +24,20 @@
             <span id="location-text"><span id="typing-cursor">|</span></span>
         </div>
 
+        <pre class="faith-title">WW      WW  OOOO  RRRR   RRRR   YY  YY
+WW      WW OO  OO RR  RR RR  RR  YY  YY
+WW   W  WW OO  OO RRRR   RRRR    YYYY
+ WW WWW WW OO  OO RR RR  RR RR     YY
+  WW   WW   OOOO  RR  RR RR  RR    YY  </pre>
+
         <div class="icon-links">
             <a href="#" aria-label="TikTok Menu" id="tiktok-pop-trigger" data-popup-target="tiktok-popup" class="icon-link popup-trigger"><i class="fa-brands fa-tiktok"></i></a>
             <a href="#" aria-label="Discord Menu" id="discord-pop-trigger" data-popup-target="discord-popup" class="icon-link popup-trigger"><i class="fa-brands fa-discord"></i></a>
         </div>
 
          <div id="tiktok-popup" class="popup-menu hidden">
-            <div class="popup-row"><a href="https://www.tiktok.com/@expertsly" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="TikTok User 1"><i class="fab fa-tiktok popup-icon"></i><span class="popup-text multicolor-neon"><span>e</span><span>x</span><span>p</span><span>e</span><span>r</span><span>t</span><span>s</span><span>l</span><span>y</span></span></a></div>
-            <div class="popup-row"><a href="https://www.tiktok.com/@worry.rip" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="TikTok User 2"><i class="fab fa-tiktok popup-icon"></i><span class="popup-text multicolor-neon"><span>w</span><span>o</span><span>r</span><span>r</span><span>y</span><span>.</span><span>r</span><span>i</span><span>p</span></span></a></div>
+             <div class="popup-row"><a href="https://www.tiktok.com/@expertsly" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="TikTok User 1"><i class="fab fa-tiktok popup-icon"></i><span class="popup-text multicolor-neon"><span>e</span><span>x</span><span>p</span><span>e</span><span>r</span><span>t</span><span>s</span><span>l</span><span>y</span></span></a></div>
+             <div class="popup-row"><a href="https://www.tiktok.com/@worry.rip" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="TikTok User 2"><i class="fab fa-tiktok popup-icon"></i><span class="popup-text multicolor-neon"><span>w</span><span>o</span><span>r</span><span>r</span><span>y</span><span>.</span><span>r</span><span>i</span><span>p</span></span></a></div>
          </div>
         <div id="discord-popup" class="popup-menu hidden">
             <div class="popup-row"><a href="https://discord.com/users/1265799421417754664" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="Discord User 1"><i class="fab fa-discord popup-icon"></i><span class="popup-text multicolor-neon"><span>w</span><span>r</span><span>y</span><span>.</span><span>r</span><span>i</span><span>p</span></span></a></div>
@@ -60,5 +66,5 @@
 
     <script src="script.js"></script>
 
-    </body>
+</body>
 </html>

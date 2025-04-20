@@ -1,7 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Loaded. Checking for LightweightCharts library..."); // This check is no longer relevant as we removed the library
     console.log("DOM Loaded. Setting up elements...");
-
 
     // --- Standard Elements ---
     const entryScreen = document.getElementById('entry-screen');
@@ -18,24 +16,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationTextElement = document.getElementById('location-text');
     const typingCursorElement = document.getElementById('typing-cursor');
 
-    // --- Graph Simulation Elements & State ---
-    const canvasLeft = document.getElementById('graph-canvas-left');
-    const ctxLeft = canvasLeft ? canvasLeft.getContext('2d') : null;
-    const canvasRight = document.getElementById('graph-canvas-right');
-    const ctxRight = canvasRight ? canvasRight.getContext('2d') : null;
-    console.log("Canvas Contexts:", ctxLeft ? 'Found' : 'NULL', ctxRight ? 'Found' : 'NULL'); // Check contexts
+    // --- Ticker Bar Elements & State ---
+    const tickerContainerLeft = document.getElementById('ticker-container-left');
+    const tickerContainerRight = document.getElementById('ticker-container-right');
+    console.log("Ticker Containers Selected:", tickerContainerLeft, tickerContainerRight); // Check selection
 
-    let graphIntervalLeft = null;
-    let graphIntervalRight = null;
-    let graphDataLeft = [];
-    let graphDataRight = [];
-    const graphConfig = {
-        pointsToShow: 50, updateInterval: 150, yMin: 10, yMax: 90, volatility: 5,
-        // Using temporary debug colors
-        // neonViolet: '#ee82ee', neonPurple: '#9d00ff',
-        debugColor: 'lime', // Bright color for debugging lines
-        glowBlur: 5, lineWidth: 2,
+    let tickerIntervalLeft = null;
+    let tickerIntervalRight = null;
+    const tickerConfig = {
+        maxBars: 35, // How many bars fit visually
+        updateInterval: 300, // ms between new bars (~10.5s cycle)
+        minHeight: 10, // px
+        maxHeight: 70, // px (relative to container height 80px)
+        // Using fixed height/color for debugging from CSS temporarily
+        // upColorClass: 'bar-up',
+        // downColorClass: 'bar-down'
     };
+    let lastValueLeft = { value: tickerConfig.maxHeight / 2 }; // Use object to pass by reference
+    let lastValueRight = { value: tickerConfig.maxHeight / 2 };
 
     // --- Global State ---
     let visiblePopupForTilt = null; let lastTrailTime = 0; const trailInterval = 50;
@@ -49,84 +47,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationString = "London, UK"; const typeSpeed = 180; const deleteSpeed = 120; const pauseDuration = 2500; let locationCharIndex = 0; let locationIsDeleting = false; let locationLoopTimeout;
     function typeDeleteLoop() { clearTimeout(locationLoopTimeout); const cursor = typingCursorElement; if (!locationTextElement || !cursor) return; if (!locationIsDeleting) { if (locationCharIndex < locationString.length) { const letterSpan = document.createElement('span'); letterSpan.textContent = locationString.charAt(locationCharIndex); locationTextElement.insertBefore(letterSpan, cursor); locationCharIndex++; locationLoopTimeout = setTimeout(typeDeleteLoop, typeSpeed); } else { locationIsDeleting = true; if (cursor) cursor.style.animationPlayState = 'paused'; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration); } } else { const letterSpans = locationTextElement.querySelectorAll('span:not(#typing-cursor)'); if (letterSpans.length > 0) { if (cursor) cursor.style.animationPlayState = 'running'; locationTextElement.removeChild(letterSpans[letterSpans.length - 1]); locationLoopTimeout = setTimeout(typeDeleteLoop, deleteSpeed); } else { locationIsDeleting = false; locationCharIndex = 0; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration / 2); } } }
 
-    // --- Graph Simulation Logic START ---
-    function resizeGraphCanvas(canvas) { if (!canvas) return; const container = canvas.parentElement; canvas.width = container.clientWidth; canvas.height = container.clientHeight; console.log(`Canvas ${canvas.id} resized to ${canvas.width}x${canvas.height}`); }
-    function generateNextValue(previousValue) { let change = (Math.random() - 0.48) * graphConfig.volatility; let newValue = previousValue + change; newValue = Math.max(graphConfig.yMin, Math.min(graphConfig.yMax, newValue)); return newValue; }
-    // function getGraphColor() { ... } // Using fixed debug color for now
+    // --- Ticker Bar Simulation Logic START (Corrected) ---
+    function updateTicker(container, lastValueState) {
+        if (!container) return;
 
-    function drawGraph(ctx, canvas, dataPoints) {
-        if (!ctx || !canvas || dataPoints.length < 1) { // Need at least 1 point now
-             console.warn(`Skipping drawGraph for ${canvas.id} - Ctx: ${!!ctx}, Canvas: ${!!canvas}, Points: ${dataPoints.length}`);
-             return;
+        // 1. Generate new bar data
+        const newHeight = Math.random() * (tickerConfig.maxHeight - tickerConfig.minHeight) + tickerConfig.minHeight;
+        const currentValue = newHeight;
+        const isUp = currentValue >= lastValueState.value;
+        lastValueState.value = currentValue; // Update state for next comparison
+
+        // 2. Create new bar element (div)
+        const bar = document.createElement('div');
+        bar.classList.add('ticker-bar');
+
+        // Set height (DEBUG CSS currently overrides this with fixed height)
+        bar.style.height = `${newHeight}px`;
+
+        // Set color class (DEBUG CSS currently overrides this with lime)
+        // bar.classList.add(isUp ? tickerConfig.upColorClass : tickerConfig.downColorClass);
+
+         console.log(`Adding bar to ${container.id}, height: ${newHeight.toFixed(0)}px`); // Debug log
+
+        // 3. Add new bar to the beginning of the container
+        container.insertBefore(bar, container.firstChild);
+
+        // 4. Remove oldest bar if container is full
+        while (container.children.length > tickerConfig.maxBars) {
+            if (container.lastChild) { // Check if lastChild exists before removing
+                 container.removeChild(container.lastChild);
+            } else {
+                break; // Exit loop if no children left to remove
+            }
         }
-        console.log(`Drawing graph ${canvas.id} with ${dataPoints.length} points.`); // Debug: Check if drawing starts
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous frame
-        const stepX = canvas.width / Math.max(1, (graphConfig.pointsToShow - 1)); // Prevent division by zero
-        const rangeY = graphConfig.yMax - graphConfig.yMin;
-        if (rangeY <= 0) { console.error("Invalid Y range for graph"); return; } // Prevent division by zero
-
-        ctx.beginPath();
-        let x = 0;
-        let y = canvas.height - ((dataPoints[0] - graphConfig.yMin) / rangeY) * canvas.height;
-        ctx.moveTo(x, Math.max(0, Math.min(canvas.height, y))); // Clamp initial y
-
-        for (let i = 1; i < dataPoints.length; i++) {
-            x = i * stepX;
-            y = canvas.height - ((dataPoints[i] - graphConfig.yMin) / rangeY) * canvas.height;
-            y = Math.max(0, Math.min(canvas.height, y)); // Clamp y coordinates
-            ctx.lineTo(x, y);
-            // console.log(` -> Point ${i}: x=${x.toFixed(1)}, y=${y.toFixed(1)} (Value: ${dataPoints[i].toFixed(1)})`); // Debug: Log points (can be noisy)
-        }
-
-        // Style and draw the line (DEBUG COLORS)
-        ctx.strokeStyle = graphConfig.debugColor; // LIME GREEN
-        ctx.lineWidth = graphConfig.lineWidth;
-        ctx.shadowColor = graphConfig.debugColor; // LIME GREEN GLOW
-        ctx.shadowBlur = graphConfig.glowBlur;
-        ctx.stroke();
-        console.log(`Graph ${canvas.id} stroke drawn.`); // Debug: Confirm drawing happened
-
-        // Reset shadow
-         ctx.shadowColor = 'transparent';
-         ctx.shadowBlur = 0;
     }
 
-    function updateGraphAndDraw(ctx, canvas, dataArray) {
-        if (!ctx || !canvas || !dataArray) return;
-        const lastValue = dataArray.length > 0 ? dataArray[dataArray.length - 1] : (graphConfig.yMin + graphConfig.yMax) / 2;
-        const nextValue = generateNextValue(lastValue);
-        console.log(`Updating graph ${canvas.id}, new value: ${nextValue.toFixed(2)}`); // Debug: Check value generation
+    function startTickerAnimation() {
+        console.log("Starting CORRECT ticker bar animation..."); // Updated log
+        if (tickerIntervalLeft) clearInterval(tickerIntervalLeft);
+        if (tickerIntervalRight) clearInterval(tickerIntervalRight);
 
-        dataArray.push(nextValue);
-        while (dataArray.length > graphConfig.pointsToShow) { dataArray.shift(); }
-        if (dataArray.length < 2) { dataArray.push(generateNextValue(nextValue)); }
+        // Reset state objects
+        lastValueLeft = { value: tickerConfig.maxHeight / 2 };
+        lastValueRight = { value: tickerConfig.maxHeight / 2 };
 
-        drawGraph(ctx, canvas, dataArray);
+        if (tickerContainerLeft) {
+            tickerIntervalLeft = setInterval(() => updateTicker(tickerContainerLeft, lastValueLeft), tickerConfig.updateInterval);
+            console.log("Left ticker interval started.");
+        } else { console.error("Left ticker container not found!"); }
+
+        if (tickerContainerRight) {
+             // Slight delay for right side
+            setTimeout(() => {
+                 tickerIntervalRight = setInterval(() => updateTicker(tickerContainerRight, lastValueRight), tickerConfig.updateInterval + 20);
+                 console.log("Right ticker interval started.");
+            }, 300);
+        } else { console.error("Right ticker container not found!"); }
     }
-
-    function startGraphAnimation() {
-        console.log("Starting graph simulation setup...");
-        if (graphIntervalLeft) clearInterval(graphIntervalLeft); if (graphIntervalRight) clearInterval(graphIntervalRight);
-        graphDataLeft = [(graphConfig.yMin + graphConfig.yMax) / 2]; graphDataRight = [(graphConfig.yMin + graphConfig.yMax) / 2];
-
-        if (ctxLeft && canvasLeft) {
-             resizeGraphCanvas(canvasLeft); // Initial size set
-             drawGraph(ctxLeft, canvasLeft, graphDataLeft); // Initial draw
-             graphIntervalLeft = setInterval(() => updateGraphAndDraw(ctxLeft, canvasLeft, graphDataLeft), graphConfig.updateInterval);
-             console.log("Left graph interval started.");
-        } else { console.error("Failed to start left graph animation - context or canvas missing."); }
-
-        if (ctxRight && canvasRight) {
-            resizeGraphCanvas(canvasRight); // Initial size set
-            drawGraph(ctxRight, canvasRight, graphDataRight); // Initial draw
-            setTimeout(() => { graphIntervalRight = setInterval(() => updateGraphAndDraw(ctxRight, canvasRight, graphDataRight), graphConfig.updateInterval + 10); console.log("Right graph interval started."); }, 150);
-        } else { console.error("Failed to start right graph animation - context or canvas missing."); }
-
-        window.addEventListener('resize', () => { if(canvasLeft){ resizeGraphCanvas(canvasLeft); drawGraph(ctxLeft, canvasLeft, graphDataLeft); } if(canvasRight){ resizeGraphCanvas(canvasRight); drawGraph(ctxRight, canvasRight, graphDataRight); } });
-        console.log("Graph animation setup complete.");
-    }
-    // --- Graph Simulation Logic END ---
+    // --- Ticker Bar Simulation Logic END ---
 
 
     // --- Entry Screen Logic ---
@@ -140,15 +118,14 @@ document.addEventListener('DOMContentLoaded', () => {
             backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); });
             updateVolumeUI();
             if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); }
-            // Start graphs slightly after visible transition starts
-            setTimeout(() => { startGraphAnimation(); }, 100); // Start slightly sooner maybe
+            startTickerAnimation(); // <<< Start CORRECT Ticker Simulation
         }, 500);
     }, { once: true });
 
 
     // --- Cursor Tracking, Popup Tilt, Falling Trail ---
     document.addEventListener('mousemove', (e) => { if (customCursor) { customCursor.style.left = `${e.clientX}px`; customCursor.style.top = `${e.clientY}px`; } if(visiblePopupForTilt) { tiltPopup(e, visiblePopupForTilt); } const now = Date.now(); if (now - lastTrailTime > trailInterval) { createFallingTrailChar(e.clientX, e.clientY); lastTrailTime = now; } });
-    function createFallingTrailChar(x, y) { const trailEl = document.createElement('div'); trailEl.classList.add('trail-cursor-char'); trailEl.textContent = '𖹭'; trailEl.style.left = `${x}px`; trailEl.style.top = `${y}px`; document.body.appendChild(trailEl); setTimeout(() => { trailEl.remove(); }, 1000); }
+    function createFallingTrailChar(x, y) { const trailEl = document.createElement('div'); trailEl.classList.add('trail-cursor-char'); trailEl.textContent = '𖹭'; trailEl.style.left = `${x}px`; trailEl.style.top = `${y}px`; document.body.appendChild(trailEl); setTimeout(() => { trailEl.remove(); }, 1000); } // Match fall animation
     function tiltPopup(e, popupElement) { const centerX = window.innerWidth / 2; const centerY = window.innerHeight / 2; const deltaX = e.clientX - centerX; const deltaY = e.clientY - centerY; const maxRotate = 15; const rotateY = -(deltaX / centerX) * maxRotate; const rotateX = (deltaY / centerY) * maxRotate; const clampedRotateX = Math.max(-maxRotate, Math.min(maxRotate, rotateX)); const clampedRotateY = Math.max(-maxRotate, Math.min(maxRotate, rotateY)); popupElement.style.transform = `translateX(-50%) rotateX(${clampedRotateX}deg) rotateY(${clampedRotateY}deg)`; }
     function resetPopupTilt(popupElement) { if(popupElement) { popupElement.style.transform = `translateX(-50%) rotateX(0deg) rotateY(0deg)`; } }
 

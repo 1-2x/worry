@@ -2,24 +2,14 @@
 body {
     background-color: #000;
     color: #eee;
-    margin: 0;
-    padding: 0;
-    font-family: 'Courier New', Courier, monospace;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    cursor: none !important;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
+    margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace;
+    min-height: 100vh; display: flex; justify-content: center;
+    align-items: center; overflow: hidden; cursor: none !important;
+    user-select: none; -webkit-user-select: none; -moz-user-select: none;
     -ms-user-select: none;
 }
 
-* {
-    cursor: none !important; /* Hides system cursor everywhere */
-}
+* { cursor: none !important; }
 
 /* Entry Screen */
 #entry-screen {
@@ -28,95 +18,101 @@ body {
     align-items: center; flex-direction: column; z-index: 100; opacity: 1;
     transition: opacity 0.5s ease-out; overflow: hidden;
 }
-
-#entry-screen p {
-     font-size: 1.5em; color: #eee; text-shadow: none; position: static;
-     animation: none; margin-top: 0;
-}
-
+#entry-screen p { font-size: 1.5em; color: #eee; text-shadow: none; position: static; animation: none; margin-top: 0; }
 #entry-screen.hidden { opacity: 0; pointer-events: none; }
 
 /* Main Content Area */
 #main-content {
     display: none; text-align: center; flex-direction: column;
     align-items: center; justify-content: center; opacity: 0;
-    transition: opacity 1s ease-in;
-    padding-bottom: 50px; /* Reduced padding as footer removed */
+    transition: opacity 1s ease-in; padding-bottom: 50px;
     position: relative;
+    /* Added for 3D popup effect */
+    perspective: 1000px;
 }
-
 #main-content.visible { display: flex; opacity: 1; }
 
 /* Location Indicator START */
 #location-indicator {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px; /* Space between icon and text */
-    margin-bottom: 15px; /* Space above ASCII art */
-    font-size: 1rem; /* Size of text/icon */
+    display: flex; justify-content: center; align-items: center;
+    gap: 10px; margin-bottom: 15px; font-size: 1rem;
 }
-
 #location-indicator i {
-    font-size: 1.1em; /* Slightly larger icon */
-    /* Color animation Red <-> Purple */
-    animation: location-color-change 4s linear infinite alternate;
+    font-size: 1.1em;
+    /* Dark Red <-> Light Red Animation */
+    animation: location-color-change-red 1.5s linear infinite alternate;
 }
 
-@keyframes location-color-change {
-     0% { color: #ff0000; } /* Red */
-    100% { color: #9d00ff; } /* Purple */
+/* Updated Keyframes */
+@keyframes location-color-change-red {
+     0% { color: #a00000; } /* Dark Red */
+    100% { color: #ff4d4d; } /* Light Red */
 }
 
 #location-text {
-    color: #eee; /* White/light grey text */
+    color: black; /* Black text */
     font-family: 'Courier New', Courier, monospace;
-    min-height: 1.2em; /* Prevent layout shift during delete */
+    min-height: 1.2em;
+    font-weight: bold;
+    font-size: 1.1em;
+    /* Faint white outline using text-shadow */
+    text-shadow:
+       -1px -1px 0 rgba(255, 255, 255, 0.7),
+        1px -1px 0 rgba(255, 255, 255, 0.7),
+       -1px  1px 0 rgba(255, 255, 255, 0.7),
+        1px  1px 0 rgba(255, 255, 255, 0.7),
+        0    0   2px rgba(255, 255, 255, 0.3); /* Faint blur */
+}
+
+/* Blinking Cursor for Typing Effect */
+#typing-cursor {
+    display: inline-block;
+    background-color: rgba(255, 255, 255, 0.7); /* White cursor */
+    width: 2px; /* Thin cursor */
+    height: 1.1em; /* Match text height */
+    animation: blink-caret 1s step-end infinite;
+    margin-left: 1px;
+    vertical-align: text-bottom; /* Align with text */
+}
+
+@keyframes blink-caret {
+    from, to { background-color: transparent; }
+    50% { background-color: rgba(255, 255, 255, 0.7); }
 }
 /* Location Indicator END */
 
 
 /* Title Styling (ASCII Art) */
 .faith-title {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 0.9rem; line-height: 1.0; margin-bottom: 1.5rem;
-    font-weight: normal; text-align: center; width: fit-content;
-    margin-left: auto; margin-right: auto; color: #ff00ff;
-    text-shadow: 0 0 6px #ff00ff, 0 0 10px #ff00ff; animation: none;
-    white-space: pre;
+    font-family: 'Courier New', Courier, monospace; font-size: 0.9rem;
+    line-height: 1.0; margin-bottom: 1.5rem; font-weight: normal;
+    text-align: center; width: fit-content; margin-left: auto; margin-right: auto;
+    color: #ff00ff; text-shadow: 0 0 6px #ff00ff, 0 0 10px #ff00ff;
+    animation: none; white-space: pre;
 }
 
 /* Icon Links */
 .icon-links { margin-bottom: 2rem; position: relative; }
-
-.icon-links a.icon-link {
-    color: #ff00ff; text-decoration: none; font-size: 2rem; margin: 0 0.75rem;
-    transition: color 0.3s, text-shadow 0.3s; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff;
-    animation: color-change-icons 6s linear infinite; display: inline-block;
-}
-.icon-links a.popup-trigger { /* This now includes Discord and TikTok */
-     animation: color-change-icons 6s linear infinite;
-}
-
+.icon-links a.icon-link { color: #ff00ff; text-decoration: none; font-size: 2rem; margin: 0 0.75rem; transition: color 0.3s, text-shadow 0.3s; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; animation: color-change-icons 6s linear infinite; display: inline-block; }
+.icon-links a.popup-trigger { animation: color-change-icons 6s linear infinite; }
 .icon-links a i { display: block; }
-
-@keyframes color-change-icons { /* Shared by icons */
-    0%   { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; }
-    33%  { color: #00ffff; text-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff; }
-    66%  { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; }
-    100% { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; }
-}
-
+@keyframes color-change-icons { 0% { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; } 33% { color: #00ffff; text-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff; } 66% { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; } 100% { color: #ff00ff; text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff; } }
 .icon-links a:hover { color: #fff; text-shadow: 0 0 6px #ff00ff, 0 0 12px #ff00ff, 0 0 18px #ff00ff; }
 
 /* General Popup Menu Styles */
 .popup-menu {
-    position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    position: absolute; top: 100%; left: 50%;
+    /* Keep translateX for centering, add rotations later via JS */
+    transform: translateX(-50%) rotateX(0deg) rotateY(0deg);
     background-color: rgba(10, 0, 20, 0.9); border: 2px solid #9d00ff;
     box-shadow: 0 0 10px #9d00ff, 0 0 20px #9d00ff, inset 0 0 5px rgba(157, 0, 255, 0.5);
     padding: 15px 20px; border-radius: 8px; z-index: 1050; margin-top: 15px;
-    opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+    opacity: 0; visibility: hidden;
+    /* Add transform to transition for smooth tilting */
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.1s ease-out;
     min-width: 250px;
+    /* Needed for 3D transform */
+    transform-style: preserve-3d;
 }
 .popup-menu.visible { opacity: 1; visibility: visible; }
 .popup-row { display: flex; align-items: center; margin-bottom: 12px; }
@@ -141,13 +137,12 @@ body {
 @keyframes multicolor-letter-glow { 0% { color: #ff0000; } 20% { color: #9d00ff; } 40% { color: #0000ff; } 60% { color: #ff00ff; } 80% { color: #00ffff; } 100% { color: #ff0000; } }
 
 /* Fake View Counter Area */
-#view-counter-area { position: fixed; bottom: 15px; /* Moved up slightly */ left: 0; right: 0; text-align: center; z-index: 50; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; }
+#view-counter-area { position: fixed; bottom: 15px; left: 0; right: 0; text-align: center; z-index: 50; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; }
 #color-changing-eye { font-size: 0.9rem; animation: color-change-eye 4s linear infinite alternate; }
 #visit-count { font-size: 0.8rem; color: white; font-family: 'Courier New', Courier, monospace; min-width: 10px; }
 @keyframes color-change-eye { 0% { color: #ff0000; } 100% { color: #9d00ff; } }
 
 /* Footer Credit Link REMOVED */
-/* .footer-credit rule REMOVED */
 
 /* --- Volume Control --- */
 #volume-control-container { position: fixed; top: 15px; left: 15px; background-color: rgba(40, 30, 50, 0.6); border-radius: 25px; padding: 5px; display: flex; align-items: center; z-index: 1100; backdrop-filter: blur(3px); border: 1px solid rgba(255, 255, 255, 0.1); opacity: 0; visibility: hidden; transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.9s; }
@@ -168,6 +163,4 @@ body {
 #custom-cursor::before, #custom-cursor::after { content: none; }
 @keyframes cursor-color-change-text { 0% { color: #ff00ff; } 33% { color: #9d00ff; } 66% { color: #ff0033; } 100% { color: #ff00ff; } }
 
-/* --- Trail Cat CSS REMOVED --- */
-/* .trail-cat REMOVED */
-/* @keyframes fade-out-cat REMOVED */
+/* --- Trail Cat Styles REMOVED --- */

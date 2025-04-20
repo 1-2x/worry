@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM Loaded. Checking for LightweightCharts library..."); // This check is no longer relevant as we removed the library
+    console.log("DOM Loaded. Setting up elements...");
+
+
     // --- Standard Elements ---
     const entryScreen = document.getElementById('entry-screen');
     const mainContent = document.getElementById('main-content');
@@ -19,20 +23,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctxLeft = canvasLeft ? canvasLeft.getContext('2d') : null;
     const canvasRight = document.getElementById('graph-canvas-right');
     const ctxRight = canvasRight ? canvasRight.getContext('2d') : null;
+    console.log("Canvas Contexts:", ctxLeft ? 'Found' : 'NULL', ctxRight ? 'Found' : 'NULL'); // Check contexts
+
     let graphIntervalLeft = null;
     let graphIntervalRight = null;
     let graphDataLeft = [];
     let graphDataRight = [];
     const graphConfig = {
-        pointsToShow: 50, // Number of points visible
-        updateInterval: 150, // ms between new points (~7.5s cycle for 50 points)
-        yMin: 10,
-        yMax: 90,
-        volatility: 5, // How much value can change each step
-        neonViolet: '#ee82ee',
-        neonPurple: '#9d00ff',
-        glowBlur: 8,
-        lineWidth: 2,
+        pointsToShow: 50, updateInterval: 150, yMin: 10, yMax: 90, volatility: 5,
+        // Using temporary debug colors
+        // neonViolet: '#ee82ee', neonPurple: '#9d00ff',
+        debugColor: 'lime', // Bright color for debugging lines
+        glowBlur: 5, lineWidth: 2,
     };
 
     // --- Global State ---
@@ -48,121 +50,81 @@ document.addEventListener('DOMContentLoaded', () => {
     function typeDeleteLoop() { clearTimeout(locationLoopTimeout); const cursor = typingCursorElement; if (!locationTextElement || !cursor) return; if (!locationIsDeleting) { if (locationCharIndex < locationString.length) { const letterSpan = document.createElement('span'); letterSpan.textContent = locationString.charAt(locationCharIndex); locationTextElement.insertBefore(letterSpan, cursor); locationCharIndex++; locationLoopTimeout = setTimeout(typeDeleteLoop, typeSpeed); } else { locationIsDeleting = true; if (cursor) cursor.style.animationPlayState = 'paused'; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration); } } else { const letterSpans = locationTextElement.querySelectorAll('span:not(#typing-cursor)'); if (letterSpans.length > 0) { if (cursor) cursor.style.animationPlayState = 'running'; locationTextElement.removeChild(letterSpans[letterSpans.length - 1]); locationLoopTimeout = setTimeout(typeDeleteLoop, deleteSpeed); } else { locationIsDeleting = false; locationCharIndex = 0; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration / 2); } } }
 
     // --- Graph Simulation Logic START ---
+    function resizeGraphCanvas(canvas) { if (!canvas) return; const container = canvas.parentElement; canvas.width = container.clientWidth; canvas.height = container.clientHeight; console.log(`Canvas ${canvas.id} resized to ${canvas.width}x${canvas.height}`); }
+    function generateNextValue(previousValue) { let change = (Math.random() - 0.48) * graphConfig.volatility; let newValue = previousValue + change; newValue = Math.max(graphConfig.yMin, Math.min(graphConfig.yMax, newValue)); return newValue; }
+    // function getGraphColor() { ... } // Using fixed debug color for now
 
-    // Resize canvas to fit container
-    function resizeGraphCanvas(canvas) {
-        if (!canvas) return;
-        const container = canvas.parentElement;
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
-    }
-
-    // Generate the next value for the graph line
-    function generateNextValue(previousValue) {
-        let change = (Math.random() - 0.48) * graphConfig.volatility; // Slightly biased upwards?
-        let newValue = previousValue + change;
-        // Clamp value within min/max bounds
-        newValue = Math.max(graphConfig.yMin, Math.min(graphConfig.yMax, newValue));
-        return newValue;
-    }
-
-     // Calculate color based on time for smooth purple <-> violet transition
-    function getGraphColor() {
-        const hueSpeed = 0.0001; // Speed of color change
-        const time = Date.now();
-        // Oscillate between purple (270 deg) and violet (approx 300 deg in HSL, or use magenta 300)
-        const purpleHue = 270;
-        const violetHue = 300; // Magenta-ish violet
-        const hueRange = violetHue - purpleHue;
-        // Use sine wave for smooth oscillation between 0 and 1
-        const oscillation = (Math.sin(time * hueSpeed * Math.PI * 2) + 1) / 2;
-        const currentHue = purpleHue + oscillation * hueRange;
-        return `hsl(${currentHue}, 100%, 65%)`; // Use HSL for easy hue animation, 65% lightness for neon feel
-    }
-
-
-    // Draw the line graph on the canvas
     function drawGraph(ctx, canvas, dataPoints) {
-        if (!ctx || !canvas || dataPoints.length < 2) return;
+        if (!ctx || !canvas || dataPoints.length < 1) { // Need at least 1 point now
+             console.warn(`Skipping drawGraph for ${canvas.id} - Ctx: ${!!ctx}, Canvas: ${!!canvas}, Points: ${dataPoints.length}`);
+             return;
+        }
+        console.log(`Drawing graph ${canvas.id} with ${dataPoints.length} points.`); // Debug: Check if drawing starts
 
         ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous frame
-
-        const stepX = canvas.width / (graphConfig.pointsToShow - 1);
+        const stepX = canvas.width / Math.max(1, (graphConfig.pointsToShow - 1)); // Prevent division by zero
         const rangeY = graphConfig.yMax - graphConfig.yMin;
-        const color = getGraphColor(); // Get current neon color
+        if (rangeY <= 0) { console.error("Invalid Y range for graph"); return; } // Prevent division by zero
 
         ctx.beginPath();
-        // Map first point to canvas coordinates
         let x = 0;
         let y = canvas.height - ((dataPoints[0] - graphConfig.yMin) / rangeY) * canvas.height;
-        ctx.moveTo(x, y);
+        ctx.moveTo(x, Math.max(0, Math.min(canvas.height, y))); // Clamp initial y
 
-        // Draw lines to subsequent points
         for (let i = 1; i < dataPoints.length; i++) {
             x = i * stepX;
             y = canvas.height - ((dataPoints[i] - graphConfig.yMin) / rangeY) * canvas.height;
+            y = Math.max(0, Math.min(canvas.height, y)); // Clamp y coordinates
             ctx.lineTo(x, y);
+            // console.log(` -> Point ${i}: x=${x.toFixed(1)}, y=${y.toFixed(1)} (Value: ${dataPoints[i].toFixed(1)})`); // Debug: Log points (can be noisy)
         }
 
-        // Style and draw the line
-        ctx.strokeStyle = color;
+        // Style and draw the line (DEBUG COLORS)
+        ctx.strokeStyle = graphConfig.debugColor; // LIME GREEN
         ctx.lineWidth = graphConfig.lineWidth;
-        ctx.shadowColor = color;
+        ctx.shadowColor = graphConfig.debugColor; // LIME GREEN GLOW
         ctx.shadowBlur = graphConfig.glowBlur;
         ctx.stroke();
+        console.log(`Graph ${canvas.id} stroke drawn.`); // Debug: Confirm drawing happened
 
-         // Optional: Reset shadow for other potential drawings
+        // Reset shadow
          ctx.shadowColor = 'transparent';
          ctx.shadowBlur = 0;
     }
 
-    // Update data array and redraw
     function updateGraphAndDraw(ctx, canvas, dataArray) {
-        if (!dataArray) return;
+        if (!ctx || !canvas || !dataArray) return;
         const lastValue = dataArray.length > 0 ? dataArray[dataArray.length - 1] : (graphConfig.yMin + graphConfig.yMax) / 2;
         const nextValue = generateNextValue(lastValue);
+        console.log(`Updating graph ${canvas.id}, new value: ${nextValue.toFixed(2)}`); // Debug: Check value generation
 
         dataArray.push(nextValue);
-        // Remove oldest point if array is too long
-        while (dataArray.length > graphConfig.pointsToShow) {
-            dataArray.shift();
-        }
-        // Ensure array has at least 2 points to draw a line
-        if (dataArray.length < 2) {
-             dataArray.push(generateNextValue(nextValue)); // Add another point if needed
-        }
+        while (dataArray.length > graphConfig.pointsToShow) { dataArray.shift(); }
+        if (dataArray.length < 2) { dataArray.push(generateNextValue(nextValue)); }
 
         drawGraph(ctx, canvas, dataArray);
     }
 
-    // Initialize and start the animation loops
     function startGraphAnimation() {
-        console.log("Starting graph simulation...");
-        if (graphIntervalLeft) clearInterval(graphIntervalLeft);
-        if (graphIntervalRight) clearInterval(graphIntervalRight);
-        graphDataLeft = [(graphConfig.yMin + graphConfig.yMax) / 2]; // Start with a mid-value
-        graphDataRight = [(graphConfig.yMin + graphConfig.yMax) / 2];
-
-        // Initial resize and draw
-        if (ctxLeft && canvasLeft) { resizeGraphCanvas(canvasLeft); drawGraph(ctxLeft, canvasLeft, graphDataLeft); }
-        if (ctxRight && canvasRight) { resizeGraphCanvas(canvasRight); drawGraph(ctxRight, canvasRight, graphDataRight); }
-
+        console.log("Starting graph simulation setup...");
+        if (graphIntervalLeft) clearInterval(graphIntervalLeft); if (graphIntervalRight) clearInterval(graphIntervalRight);
+        graphDataLeft = [(graphConfig.yMin + graphConfig.yMax) / 2]; graphDataRight = [(graphConfig.yMin + graphConfig.yMax) / 2];
 
         if (ctxLeft && canvasLeft) {
-            graphIntervalLeft = setInterval(() => updateGraphAndDraw(ctxLeft, canvasLeft, graphDataLeft), graphConfig.updateInterval);
-        }
-        if (ctxRight && canvasRight) {
-             // Slight delay for right side
-            setTimeout(() => {
-                 graphIntervalRight = setInterval(() => updateGraphAndDraw(ctxRight, canvasRight, graphDataRight), graphConfig.updateInterval + 10); // Slightly different interval
-            }, 150);
-        }
+             resizeGraphCanvas(canvasLeft); // Initial size set
+             drawGraph(ctxLeft, canvasLeft, graphDataLeft); // Initial draw
+             graphIntervalLeft = setInterval(() => updateGraphAndDraw(ctxLeft, canvasLeft, graphDataLeft), graphConfig.updateInterval);
+             console.log("Left graph interval started.");
+        } else { console.error("Failed to start left graph animation - context or canvas missing."); }
 
-         // Handle resize
-         window.addEventListener('resize', () => {
-             if(canvasLeft){ resizeGraphCanvas(canvasLeft); drawGraph(ctxLeft, canvasLeft, graphDataLeft); } // Redraw on resize
-             if(canvasRight){ resizeGraphCanvas(canvasRight); drawGraph(ctxRight, canvasRight, graphDataRight); }
-         });
+        if (ctxRight && canvasRight) {
+            resizeGraphCanvas(canvasRight); // Initial size set
+            drawGraph(ctxRight, canvasRight, graphDataRight); // Initial draw
+            setTimeout(() => { graphIntervalRight = setInterval(() => updateGraphAndDraw(ctxRight, canvasRight, graphDataRight), graphConfig.updateInterval + 10); console.log("Right graph interval started."); }, 150);
+        } else { console.error("Failed to start right graph animation - context or canvas missing."); }
+
+        window.addEventListener('resize', () => { if(canvasLeft){ resizeGraphCanvas(canvasLeft); drawGraph(ctxLeft, canvasLeft, graphDataLeft); } if(canvasRight){ resizeGraphCanvas(canvasRight); drawGraph(ctxRight, canvasRight, graphDataRight); } });
+        console.log("Graph animation setup complete.");
     }
     // --- Graph Simulation Logic END ---
 
@@ -178,14 +140,15 @@ document.addEventListener('DOMContentLoaded', () => {
             backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); });
             updateVolumeUI();
             if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); }
-            startGraphAnimation(); // <<< Start Graph Simulation
+            // Start graphs slightly after visible transition starts
+            setTimeout(() => { startGraphAnimation(); }, 100); // Start slightly sooner maybe
         }, 500);
     }, { once: true });
 
 
     // --- Cursor Tracking, Popup Tilt, Falling Trail ---
     document.addEventListener('mousemove', (e) => { if (customCursor) { customCursor.style.left = `${e.clientX}px`; customCursor.style.top = `${e.clientY}px`; } if(visiblePopupForTilt) { tiltPopup(e, visiblePopupForTilt); } const now = Date.now(); if (now - lastTrailTime > trailInterval) { createFallingTrailChar(e.clientX, e.clientY); lastTrailTime = now; } });
-    function createFallingTrailChar(x, y) { const trailEl = document.createElement('div'); trailEl.classList.add('trail-cursor-char'); trailEl.textContent = '𖹭'; trailEl.style.left = `${x}px`; trailEl.style.top = `${y}px`; document.body.appendChild(trailEl); setTimeout(() => { trailEl.remove(); }, 1000); } // Match fall animation
+    function createFallingTrailChar(x, y) { const trailEl = document.createElement('div'); trailEl.classList.add('trail-cursor-char'); trailEl.textContent = '𖹭'; trailEl.style.left = `${x}px`; trailEl.style.top = `${y}px`; document.body.appendChild(trailEl); setTimeout(() => { trailEl.remove(); }, 1000); }
     function tiltPopup(e, popupElement) { const centerX = window.innerWidth / 2; const centerY = window.innerHeight / 2; const deltaX = e.clientX - centerX; const deltaY = e.clientY - centerY; const maxRotate = 15; const rotateY = -(deltaX / centerX) * maxRotate; const rotateX = (deltaY / centerY) * maxRotate; const clampedRotateX = Math.max(-maxRotate, Math.min(maxRotate, rotateX)); const clampedRotateY = Math.max(-maxRotate, Math.min(maxRotate, rotateY)); popupElement.style.transform = `translateX(-50%) rotateX(${clampedRotateX}deg) rotateY(${clampedRotateY}deg)`; }
     function resetPopupTilt(popupElement) { if(popupElement) { popupElement.style.transform = `translateX(-50%) rotateX(0deg) rotateY(0deg)`; } }
 

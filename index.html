@@ -1,3 +1,25 @@
+Okay, let's put all those final changes together. This version will include:
+
+ASCII Art: Replaced with >_<.
+Cursor: The main custom cursor is the small, color-cycling CSS heart (♡).
+Trail: Replaced with small CSS hearts (matching the cursor) that drop straight down and fade out.
+Drawing: Removed the right-click drawing feature.
+Right-Click Disabled: The default browser context menu is disabled site-wide.
+ASCII Cat Animation: Removed.
+Location Indicator: Included above the title, with the cyan/purple icon animation and the improved typing effect for "London, UK" (letters cycle pink/purple, includes blinking caret).
+Popups: TikTok and Discord icons trigger popups with increased 3D tilt, rounded corners, and clickable text+icons. Username hover flash effect is removed.
+View Counter: Fake counter (eye+number) positioned at the bottom center, with the number cycling pink/purple.
+Volume Control: Positioned top-left, appears after entry, with a slightly larger click area.
+Icons: Only TikTok and Discord icons remain (Supercell/BrawlStars/GitHub/Epic removed).
+Footer: "inspired by graham" text removed.
+Remember to:
+
+Have your music file named Crystal Castles _ it fit when i was a kid.mp3 in the same folder as index.html.
+Clear your browser cache and do a hard refresh (Ctrl+Shift+R or Cmd+Shift+R) after saving these files.
+1. index.html
+
+HTML
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,18 +27,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mewo</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3P5QiAj6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-
-    <div id="stock-ticker-left" class="ticker">
-        <span class="stock-value">100.00</span>
-    </div>
-
-    <div id="stock-ticker-right" class="ticker">
-        <span class="stock-value">100.00</span>
-    </div>
-
     <div id="custom-cursor"></div>
 
     <div id="entry-screen">
@@ -29,24 +42,19 @@
             <span id="location-text"><span id="typing-cursor">|</span></span>
         </div>
 
-        <pre class="faith-title">__        _____  _ __ _ __   _
-\ \  /\  / / _ \| '__| '__| | | |
- \ \/  \/ / (_) | |  | |  | |_| |
-  \_/\_/ \___/|_|  |_|   \__, |
-                          __/ |
-                         |___/  </pre>
+        <div class="faith-title">&gt;_&lt;</div>
 
         <div class="icon-links">
             <a href="#" aria-label="TikTok Menu" id="tiktok-pop-trigger" data-popup-target="tiktok-popup" class="icon-link popup-trigger"><i class="fa-brands fa-tiktok"></i></a>
             <a href="#" aria-label="Discord Menu" id="discord-pop-trigger" data-popup-target="discord-popup" class="icon-link popup-trigger"><i class="fa-brands fa-discord"></i></a>
-        </div>
+            </div>
 
          <div id="tiktok-popup" class="popup-menu hidden">
              <div class="popup-row">
-                 <a href="https://www.tiktok.com/@expertsly" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="TikTok User 1"><i class="fab fa-tiktok popup-icon"></i><span class="popup-text multicolor-neon"><span>e</span><span>x</span><span>e</span><span>r</span><span>t</span><span>s</span><span>l</span><span>y</span></span></a>
+                 <a href="https://www.tiktok.com/@expertsly" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="TikTok User 1"><i class="fab fa-tiktok popup-icon"></i><span class="popup-text multicolor-neon"><span>e</span><span>x</span><span>p</span><span>e</span><span>r</span><span>t</span><span>s</span><span>l</span><span>y</span></span></a>
              </div>
               <div class="popup-row">
-                 <a href="https://www.tiktok.com/@worry.rip" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="TikTok User 2"><i class="fab fa-tiktok popup-icon"></i><span class="popup-text multicolor-neon"><span>w</span><span>r</span><span>r</span><span>y</span><span>.</span><span>r</span><span>i</span><span>p</span></span></a>
+                 <a href="https://www.tiktok.com/@worry.rip" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="TikTok User 2"><i class="fab fa-tiktok popup-icon"></i><span class="popup-text multicolor-neon"><span>w</span><span>o</span><span>r</span><span>r</span><span>y</span><span>.</span><span>r</span><span>i</span><span>p</span></span></a>
              </div>
          </div>
         <div id="discord-popup" class="popup-menu hidden">

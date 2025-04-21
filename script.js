@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Loaded. Setting up elements...");
-
     // --- Standard Elements ---
     const entryScreen = document.getElementById('entry-screen');
     const mainContent = document.getElementById('main-content');
@@ -24,8 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let tickerIntervalLeft = null;
     let tickerIntervalRight = null;
     const tickerConfig = {
-        maxBars: 35, updateInterval: 300, minHeight: 10, maxHeight: 70,
-        upColorClass: 'bar-up', downColorClass: 'bar-down' // Keep class names
+        maxBars: 70, // Increased count for thinner bars+margin (150 / (1+1))
+        updateInterval: 120, // Faster update for more fluid look (~8.4s loop)
+        minHeight: 5, // px - Allow shorter lines
+        maxHeight: 75, // px (relative to container height 80px)
+        upColorClass: 'bar-up', // Purple class
+        downColorClass: 'bar-down' // Base class is now Red, so we need this
     };
     let lastValueLeft = { value: tickerConfig.maxHeight / 2 };
     let lastValueRight = { value: tickerConfig.maxHeight / 2 };
@@ -43,55 +45,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationString = "London, UK"; const typeSpeed = 180; const deleteSpeed = 120; const pauseDuration = 2500; let locationCharIndex = 0; let locationIsDeleting = false; let locationLoopTimeout;
     function typeDeleteLoop() { clearTimeout(locationLoopTimeout); const cursor = typingCursorElement; if (!locationTextElement || !cursor) return; if (!locationIsDeleting) { if (locationCharIndex < locationString.length) { const letterSpan = document.createElement('span'); letterSpan.textContent = locationString.charAt(locationCharIndex); locationTextElement.insertBefore(letterSpan, cursor); locationCharIndex++; locationLoopTimeout = setTimeout(typeDeleteLoop, typeSpeed); } else { locationIsDeleting = true; if (cursor) cursor.style.animationPlayState = 'paused'; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration); } } else { const letterSpans = locationTextElement.querySelectorAll('span:not(#typing-cursor)'); if (letterSpans.length > 0) { if (cursor) cursor.style.animationPlayState = 'running'; locationTextElement.removeChild(letterSpans[letterSpans.length - 1]); locationLoopTimeout = setTimeout(typeDeleteLoop, deleteSpeed); } else { locationIsDeleting = false; locationCharIndex = 0; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration / 2); } } }
 
-    // --- Ticker Bar Simulation Logic START (Added Logging) ---
+    // --- Ticker Line Simulation Logic START ---
     function updateTicker(container, lastValueState) {
         if (!container) return;
 
         const newHeight = Math.random() * (tickerConfig.maxHeight - tickerConfig.minHeight) + tickerConfig.minHeight;
-        const currentValue = newHeight; const isUp = currentValue >= lastValueState.value; lastValueState.value = currentValue;
+        const currentValue = newHeight;
+        const isUp = currentValue >= lastValueState.value;
+        lastValueState.value = currentValue;
 
-        const bar = document.createElement('div');
-        bar.classList.add('ticker-bar');
-        // Add class based on direction
+        const line = document.createElement('div'); // Still using div, styled as line
+        line.classList.add('ticker-bar'); // Base class for size/spacing/glow
+
+        // Apply color class specifically
         if (isUp) {
-            bar.classList.add(tickerConfig.upColorClass);
-        } // No need for else, base class is downColor
+            line.classList.add(tickerConfig.upColorClass); // 'bar-up' for purple
+        }
+        // No need to add 'bar-down' class as base style is red
 
-        bar.style.height = `${newHeight}px`; // Set random height
+        line.style.height = `${newHeight}px`;
 
-        // *** DETAILED LOGGING ***
-        console.log(`-- Adding bar to ${container.id}. Height: ${bar.style.height}, Class: ${isUp ? tickerConfig.upColorClass : '(default)'}`);
+        // console.log(`Adding bar to ${container.id}, height: ${newHeight.toFixed(0)}px`);
 
-        container.insertBefore(bar, container.firstChild);
-        console.log(`-- ${container.id} children AFTER insert: ${container.children.length}`);
-
+        container.insertBefore(line, container.firstChild);
 
         while (container.children.length > tickerConfig.maxBars) {
             if (container.lastChild) { container.removeChild(container.lastChild); } else { break; }
         }
-         // console.log(`-- ${container.id} children AFTER cleanup: ${container.children.length}`); // Optional: Check after cleanup
     }
 
     function startTickerAnimation() {
-        console.log("Starting CORRECT ticker bar animation...");
-        if (tickerIntervalLeft) clearInterval(tickerIntervalLeft); if (tickerIntervalRight) clearInterval(tickerIntervalRight);
-        lastValueLeft = { value: tickerConfig.maxHeight / 2 }; lastValueRight = { value: tickerConfig.maxHeight / 2 };
+        console.log("Starting ticker line simulation..."); // Updated log
+        if (tickerIntervalLeft) clearInterval(tickerIntervalLeft);
+        if (tickerIntervalRight) clearInterval(tickerIntervalRight);
+
+        lastValueLeft = { value: tickerConfig.maxHeight / 2 };
+        lastValueRight = { value: tickerConfig.maxHeight / 2 };
 
         if (tickerContainerLeft) {
-            tickerContainerLeft.innerHTML = ''; // Clear previous bars
+            tickerContainerLeft.innerHTML = ''; // Clear previous
             tickerIntervalLeft = setInterval(() => updateTicker(tickerContainerLeft, lastValueLeft), tickerConfig.updateInterval);
             console.log("Left ticker interval started.");
         } else { console.error("Cannot start Left ticker: container not found!"); }
 
         if (tickerContainerRight) {
-            tickerContainerRight.innerHTML = ''; // Clear previous bars
+             tickerContainerRight.innerHTML = ''; // Clear previous
             setTimeout(() => {
                  tickerIntervalRight = setInterval(() => updateTicker(tickerContainerRight, lastValueRight), tickerConfig.updateInterval + 20);
                  console.log("Right ticker interval started.");
             }, 300);
         } else { console.error("Cannot start Right ticker: container not found!"); }
     }
-    // --- Ticker Bar Simulation Logic END ---
+    // --- Ticker Line Simulation Logic END ---
 
 
     // --- Entry Screen Logic ---

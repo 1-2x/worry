@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM Loaded. Setting up elements...");
+
     // --- Standard Elements ---
     const entryScreen = document.getElementById('entry-screen');
     const mainContent = document.getElementById('main-content');
@@ -22,12 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let tickerIntervalLeft = null;
     let tickerIntervalRight = null;
     const tickerConfig = {
-        maxBars: 70, // Increased count for thinner bars+margin (150 / (1+1))
-        updateInterval: 120, // Faster update for more fluid look (~8.4s loop)
-        minHeight: 5, // px - Allow shorter lines
+        maxBars: 60, // Adjusted for thinner bars+margin (150 / (2+1))
+        updateInterval: 150, // Faster update for ~9 sec loop (60 * 150ms)
+        minHeight: 5, // px
         maxHeight: 75, // px (relative to container height 80px)
         upColorClass: 'bar-up', // Purple class
-        downColorClass: 'bar-down' // Base class is now Red, so we need this
+        downColorClass: 'bar-down' // Need to handle this - base is red now
     };
     let lastValueLeft = { value: tickerConfig.maxHeight / 2 };
     let lastValueRight = { value: tickerConfig.maxHeight / 2 };
@@ -54,24 +56,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const isUp = currentValue >= lastValueState.value;
         lastValueState.value = currentValue;
 
-        const line = document.createElement('div'); // Still using div, styled as line
-        line.classList.add('ticker-bar'); // Base class for size/spacing/glow
+        const line = document.createElement('div');
+        line.classList.add('ticker-bar'); // Base style is red
 
-        // Apply color class specifically
+        // Only add 'bar-up' class if value went up
         if (isUp) {
-            line.classList.add(tickerConfig.upColorClass); // 'bar-up' for purple
+            line.classList.add(tickerConfig.upColorClass); // Add 'bar-up' for purple
         }
-        // No need to add 'bar-down' class as base style is red
+        // No 'bar-down' class needed as red is the default
 
         line.style.height = `${newHeight}px`;
 
-        // console.log(`Adding bar to ${container.id}, height: ${newHeight.toFixed(0)}px`);
+        // console.log(`Adding bar to ${container.id}, height: ${newHeight.toFixed(0)}px, class: ${line.className}`); // More detailed log
 
         container.insertBefore(line, container.firstChild);
 
         while (container.children.length > tickerConfig.maxBars) {
             if (container.lastChild) { container.removeChild(container.lastChild); } else { break; }
         }
+         // console.log(`-- ${container.id} children count: ${container.children.length}`);
     }
 
     function startTickerAnimation() {
@@ -83,17 +86,17 @@ document.addEventListener('DOMContentLoaded', () => {
         lastValueRight = { value: tickerConfig.maxHeight / 2 };
 
         if (tickerContainerLeft) {
-            tickerContainerLeft.innerHTML = ''; // Clear previous
+            tickerContainerLeft.innerHTML = ''; // Clear previous bars
             tickerIntervalLeft = setInterval(() => updateTicker(tickerContainerLeft, lastValueLeft), tickerConfig.updateInterval);
             console.log("Left ticker interval started.");
         } else { console.error("Cannot start Left ticker: container not found!"); }
 
         if (tickerContainerRight) {
-             tickerContainerRight.innerHTML = ''; // Clear previous
+             tickerContainerRight.innerHTML = ''; // Clear previous bars
             setTimeout(() => {
-                 tickerIntervalRight = setInterval(() => updateTicker(tickerContainerRight, lastValueRight), tickerConfig.updateInterval + 20);
+                 tickerIntervalRight = setInterval(() => updateTicker(tickerContainerRight, lastValueRight), tickerConfig.updateInterval + 15); // Slightly different interval
                  console.log("Right ticker interval started.");
-            }, 300);
+            }, 200); // Stagger start slightly
         } else { console.error("Cannot start Right ticker: container not found!"); }
     }
     // --- Ticker Line Simulation Logic END ---

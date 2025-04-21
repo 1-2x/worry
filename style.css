@@ -8,7 +8,7 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 #entry-screen.hidden { opacity: 0; pointer-events: none; }
 
 /* Main Content Area */
-#main-content { display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease-in; /* Reduced bottom padding */ padding-bottom: 70px; position: relative; perspective: 1000px; z-index: 10; }
+#main-content { display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease-in; /* Adjust padding for bottom elements */ padding-bottom: 100px; position: relative; perspective: 1000px; z-index: 10; }
 #main-content.visible { display: flex; opacity: 1; }
 
 /* Location Indicator */
@@ -52,39 +52,40 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 /* --- Bottom Elements Wrapper --- */
 #bottom-elements {
     position: fixed;
-    bottom: 10px;
-    left: 0;
-    right: 0;
+    bottom: 10px; /* Position container at bottom */
+    left: 0; right: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 5px; /* Space between counter and chart */
+    align-items: center; /* Center children horizontally */
+    gap: 5px;
     z-index: 50;
+    pointer-events: none; /* Allow clicks through wrapper */
 }
 
-/* Fake View Counter Area (no longer needs fixed positioning) */
+/* Fake View Counter Area (positioned by parent) */
 #view-counter-area {
-    /* position: fixed; bottom: 10px; */ /* REMOVED */
-    /* left: 0; right: 0; text-align: center; z-index: 50; */ /* REMOVED */
+    /* No fixed positioning needed */
     color: white; display: flex; justify-content: center; align-items: center; gap: 8px;
+    pointer-events: auto; /* Allow interaction if needed */
 }
 #color-changing-eye { font-size: 0.9rem; animation: color-change-eye 4s linear infinite alternate; }
 #visit-count { font-size: 0.8rem; color: white; font-family: 'Courier New', Courier, monospace; min-width: 10px; animation: counter-color-change 5s linear infinite alternate; text-shadow: 0 0 3px currentColor, 0 0 6px currentColor; }
 @keyframes color-change-eye { 0% { color: #ff0000; } 100% { color: #9d00ff; } }
 @keyframes counter-color-change { 0%, 100% { color: #ff00ff; } 50% { color: #9d00ff; } }
 
-/* Single Candlestick Canvas */
-#mini-chart-canvas {
+/* Scrolling Candlestick Canvas */
+#scrolling-chart-canvas {
     display: block;
-    width: 80px; /* Adjust size as desired */
-    height: 50px;
+    width: 300px; /* Wider canvas */
+    height: 60px; /* Adjust height */
+    background-color: #000; /* Black background */
     opacity: 0; /* Hidden initially */
-    transition: opacity 0.5s ease 1.5s; /* Fade in after main content visible */
-    /* Add neon glow using filter maybe */
-    filter: drop-shadow(0 0 4px rgba(157, 0, 255, 0.5));
+    transition: opacity 0.5s ease 1.5s; /* Fade in slower */
+    filter: drop-shadow(0 0 5px rgba(157, 0, 255, 0.5)); /* Optional glow */
+    pointer-events: auto; /* Allow interaction if needed */
 }
-#main-content.visible #mini-chart-canvas {
-     opacity: 0.9; /* Make visible */
+#main-content.visible #scrolling-chart-canvas {
+     opacity: 0.85;
 }
 
 
@@ -111,5 +112,4 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 .trail-cursor-char { position: fixed; pointer-events: none; z-index: 9998; opacity: 1; font-size: 1.5rem; line-height: 1; transform: translate(-50%, -50%); animation: cursor-color-change-text 4s linear infinite, fall-fade-char 1.0s linear forwards; }
 @keyframes fall-fade-char { 0% { transform: translate(-50%, -50%) translateY(0); opacity: 1; } 100% { transform: translate(-50%, -50%) translateY(30vh); opacity: 0; } }
 
-/* --- Ticker Styles REMOVED --- */
-/* .ticker-container, .ticker-bar styles removed */
+/* Side Chart / Ticker Styles REMOVED */

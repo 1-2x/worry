@@ -8,7 +8,7 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 #entry-screen.hidden { opacity: 0; pointer-events: none; }
 
 /* Main Content Area */
-#main-content { display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease-in; padding-bottom: 40px; position: relative; perspective: 1000px; z-index: 10; /* Below popups/volume but above tickers */ }
+#main-content { display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease-in; /* Reduced bottom padding */ padding-bottom: 70px; position: relative; perspective: 1000px; z-index: 10; }
 #main-content.visible { display: flex; opacity: 1; }
 
 /* Location Indicator */
@@ -49,12 +49,44 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 .multicolor-neon span:nth-child(2) { animation-delay: 0.2s; } .multicolor-neon span:nth-child(3) { animation-delay: 0.4s; } .multicolor-neon span:nth-child(4) { animation-delay: 0.6s; } .multicolor-neon span:nth-child(5) { animation-delay: 0.8s; } .multicolor-neon span:nth-child(6) { animation-delay: 1.0s; } .multicolor-neon span:nth-child(7) { animation-delay: 1.2s; } .multicolor-neon span:nth-child(8) { animation-delay: 1.4s; } .multicolor-neon span:nth-child(9) { animation-delay: 1.6s; }
 @keyframes multicolor-letter-glow { 0% { color: #ff0000; } 20% { color: #9d00ff; } 40% { color: #0000ff; } 60% { color: #ff00ff; } 80% { color: #00ffff; } 100% { color: #ff0000; } }
 
-/* Fake View Counter Area */
-#view-counter-area { position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; z-index: 50; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; }
+/* --- Bottom Elements Wrapper --- */
+#bottom-elements {
+    position: fixed;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px; /* Space between counter and chart */
+    z-index: 50;
+}
+
+/* Fake View Counter Area (no longer needs fixed positioning) */
+#view-counter-area {
+    /* position: fixed; bottom: 10px; */ /* REMOVED */
+    /* left: 0; right: 0; text-align: center; z-index: 50; */ /* REMOVED */
+    color: white; display: flex; justify-content: center; align-items: center; gap: 8px;
+}
 #color-changing-eye { font-size: 0.9rem; animation: color-change-eye 4s linear infinite alternate; }
 #visit-count { font-size: 0.8rem; color: white; font-family: 'Courier New', Courier, monospace; min-width: 10px; animation: counter-color-change 5s linear infinite alternate; text-shadow: 0 0 3px currentColor, 0 0 6px currentColor; }
 @keyframes color-change-eye { 0% { color: #ff0000; } 100% { color: #9d00ff; } }
 @keyframes counter-color-change { 0%, 100% { color: #ff00ff; } 50% { color: #9d00ff; } }
+
+/* Single Candlestick Canvas */
+#mini-chart-canvas {
+    display: block;
+    width: 80px; /* Adjust size as desired */
+    height: 50px;
+    opacity: 0; /* Hidden initially */
+    transition: opacity 0.5s ease 1.5s; /* Fade in after main content visible */
+    /* Add neon glow using filter maybe */
+    filter: drop-shadow(0 0 4px rgba(157, 0, 255, 0.5));
+}
+#main-content.visible #mini-chart-canvas {
+     opacity: 0.9; /* Make visible */
+}
+
 
 /* --- Volume Control --- */
 #volume-control-container { position: fixed; top: 15px; left: 15px; background-color: rgba(40, 30, 50, 0.6); border-radius: 25px; padding: 5px; display: flex; align-items: center; z-index: 1100; backdrop-filter: blur(3px); border: 1px solid rgba(255, 255, 255, 0.1); opacity: 0; visibility: hidden; transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.9s; }
@@ -79,31 +111,5 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 .trail-cursor-char { position: fixed; pointer-events: none; z-index: 9998; opacity: 1; font-size: 1.5rem; line-height: 1; transform: translate(-50%, -50%); animation: cursor-color-change-text 4s linear infinite, fall-fade-char 1.0s linear forwards; }
 @keyframes fall-fade-char { 0% { transform: translate(-50%, -50%) translateY(0); opacity: 1; } 100% { transform: translate(-50%, -50%) translateY(30vh); opacity: 0; } }
 
-/* --- Ticker Bar Simulation Styles START (Force Visibility Layer) --- */
-.ticker-container {
-    position: fixed; top: 50%; transform: translateY(-50%);
-    width: 150px; height: 80px;
-    z-index: 1000 !important; /* <<< INCREASED Z-INDEX */
-    display: flex; align-items: flex-end; overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.7) !important; /* Dark BG */
-    opacity: 1 !important; /* Force visible */
-    transition: none !important; /* No transition */
-    padding: 0 2px; box-sizing: border-box;
-    border: 1px solid magenta !important; /* Magenta border for high visibility */
-}
-/* Removed #main-content.visible .ticker-container rule */
-#ticker-container-left { left: 20px; }
-#ticker-container-right { right: 20px; }
-
-.ticker-bar {
-    /* Styles applied DIRECTLY by JS now */
-    /* Fallback/Base - shouldn't be needed if JS works */
-     flex-shrink: 0;
-     width: 2px;
-     margin-right: 1px;
-     background-color: lime;
-     height: 10px;
-}
-.ticker-bar:last-child { margin-right: 0; }
-/* Removed .ticker-bar.bar-up rule */
-/* --- Ticker Bar Simulation Styles END --- */
+/* --- Ticker Styles REMOVED --- */
+/* .ticker-container, .ticker-bar styles removed */

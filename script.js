@@ -19,12 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Mini Candlestick Elements & State ---
     const miniCanvas = document.getElementById('mini-chart-canvas');
     const miniCtx = miniCanvas ? miniCanvas.getContext('2d') : null;
-    let candleInterval = null;
-    const candleConfig = {
-        updateInterval: 1500, // Update every 1.5 seconds
-        priceMin: 10, priceMax: 90, volatility: 15, wickVolatility: 5, bodyWidth: 10,
-        neonRed: '#ff0033', neonPurple: '#9d00ff', glowBlur: 6,
-    };
+    let candleInterval = null; // Interval timer
+    const candleConfig = { updateInterval: 1500, priceMin: 10, priceMax: 90, volatility: 15, wickVolatility: 5, bodyWidth: 10, neonRed: '#ff0033', neonPurple: '#9d00ff', glowBlur: 6, };
     let lastCandleData = { open: (candleConfig.priceMin + candleConfig.priceMax) / 2, high: (candleConfig.priceMin + candleConfig.priceMax) / 2 + 5, low: (candleConfig.priceMin + candleConfig.priceMax) / 2 - 5, close: (candleConfig.priceMin + candleConfig.priceMax) / 2, };
 
     // --- Global State ---
@@ -45,7 +41,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function mapY(value, canvasHeight) { const range = candleConfig.priceMax - candleConfig.priceMin; if (range <= 0) return canvasHeight / 2; const scaledValue = ((value - candleConfig.priceMin) / range); return canvasHeight - (scaledValue * canvasHeight); }
     function drawCandlestick(data) { if (!miniCtx || !miniCanvas) return; const { open, high, low, close } = data; const width = miniCanvas.width; const height = miniCanvas.height; const bodyWidth = candleConfig.bodyWidth; const centerX = width / 2; miniCtx.clearRect(0, 0, width, height); const openY = mapY(open, height); const highY = mapY(high, height); const lowY = mapY(low, height); const closeY = mapY(close, height); const isUp = close >= open; const color = isUp ? candleConfig.neonPurple : candleConfig.neonRed; miniCtx.strokeStyle = color; miniCtx.fillStyle = color; miniCtx.lineWidth = 1; miniCtx.shadowColor = color; miniCtx.shadowBlur = candleConfig.glowBlur; miniCtx.beginPath(); miniCtx.moveTo(centerX, highY); miniCtx.lineTo(centerX, lowY); miniCtx.stroke(); miniCtx.beginPath(); const bodyHeight = Math.abs(openY - closeY); const bodyY = Math.min(openY, closeY); miniCtx.rect(centerX - bodyWidth / 2, bodyY, bodyWidth, bodyHeight <= 0 ? 1 : bodyHeight); miniCtx.fill(); miniCtx.shadowColor = 'transparent'; miniCtx.shadowBlur = 0; }
     function simulateAndUpdateCandle() { lastCandleData = generateNextCandleData(lastCandleData); drawCandlestick(lastCandleData); }
-    function startCandleAnimation() { console.log("Starting candlestick simulation..."); if (candleInterval) clearInterval(candleInterval); if (miniCtx && miniCanvas) { resizeMiniCanvas(); drawCandlestick(lastCandleData); candleInterval = setInterval(simulateAndUpdateCandle, candleConfig.updateInterval); console.log("Candlestick interval started."); } else { console.error("Cannot start candle animation - canvas or context missing."); } window.addEventListener('resize', resizeMiniCanvas); }
+
+    function startCandleAnimation() {
+        console.log("Starting candlestick simulation setup...");
+        if (candleInterval) clearInterval(candleInterval);
+        if (miniCtx && miniCanvas) {
+            resizeMiniCanvas(); // Set initial size
+            drawCandlestick(lastCandleData); // Draw initial state
+
+            // *** The interval that updates the candle repeatedly is commented out ***
+            // candleInterval = setInterval(simulateAndUpdateCandle, candleConfig.updateInterval);
+
+            console.log("Candlestick initial draw complete. Update interval DISABLED.");
+        } else { console.error("Cannot start candle animation - canvas or context missing."); }
+        window.addEventListener('resize', resizeMiniCanvas);
+    }
     // --- Mini Candlestick Logic END ---
 
     // --- Entry Screen Logic ---
@@ -77,4 +87,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Close Popups when Clicking Outside Logic ---
     document.addEventListener('click', function(event) { let clickedInsideAnyPopup = false; allPopups.forEach(p => { if (p.contains(event.target)) { clickedInsideAnyPopup = true; } }); let clickedOnAnyTrigger = false; popupTriggers.forEach(t => { if (t.contains(event.target)) { clickedOnAnyTrigger = true; } }); const volumeControl = document.getElementById('volume-control-container'); const isClickInsideVolume = volumeControl ? volumeControl.contains(event.target) : false; const miniChart = document.getElementById('mini-chart-canvas'); const isClickInsideMiniChart = miniChart ? miniChart.contains(event.target) : false; if (!clickedInsideAnyPopup && !clickedOnAnyTrigger && !isClickInsideVolume && !isClickInsideMiniChart) { closeAllPopups(); } });
 
-}); // <<< The missing closing brace and parenthesis
+}); // End of DOMContentLoaded listener

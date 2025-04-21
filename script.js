@@ -16,23 +16,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationTextElement = document.getElementById('location-text');
     const typingCursorElement = document.getElementById('typing-cursor');
 
-    // --- Single Scrolling Chart Elements & State ---
-    const chartCanvas = document.getElementById('scrolling-chart-canvas'); // Single canvas
+    // --- Scrolling Chart Elements & State ---
+    const chartCanvas = document.getElementById('scrolling-chart-canvas'); // Get the single canvas
     const chartCtx = chartCanvas ? chartCanvas.getContext('2d') : null;
     console.log("Scrolling Chart Canvas Selected:", chartCanvas);
 
-    let chartInterval = null; // Single interval timer
-    let chartData = []; // Single data array
+    let chartInterval = null;
+    let chartData = [];
     const chartConfig = {
-        pointsToShow: 80, // Number of points visible across canvas width (adjust for new width)
-        updateInterval: 120, // ms between new points (~9.6 sec cycle for 80 points)
-        yMin: 10, yMax: 90, volatility: 10, wickVolatility: 5,
-        candleBodyWidthRatio: 0.4, wickWidth: 1.5,
+        pointsToShow: 70, // Number of points visible across canvas width (adjust for new width 350px)
+        updateInterval: 250, // Slower update interval (e.g., 70 * 250ms = 17.5s cycle)
+        yMin: 10, yMax: 90,
+        volatility: 10, // Keep volatility reasonable
+        wickVolatility: 15, // Increased wick volatility for longer lines
+        candleBodyWidthRatio: 0.3, // Smaller body width relative to step
+        wickWidth: 1.5,
         upColor: '#9d00ff', // Neon Purple UP
         downColor: '#ff0033', // Neon Red DOWN
-        glowBlur: 5, // Slightly reduced glow
+        glowBlur: 5,
     };
-    let lastClose = (chartConfig.yMin + chartConfig.yMax) / 2; // Single last close value
+    let lastClose = (chartConfig.yMin + chartConfig.yMax) / 2;
 
 
     // --- Global State ---
@@ -49,42 +52,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Scrolling Chart Simulation Logic START ---
-    function resizeChartCanvas() {
+    function resizeChartCanvas() { // Renamed
         if (!chartCanvas) return;
         chartCanvas.width = chartCanvas.clientWidth || 350; // Match CSS width
-        chartCanvas.height = chartCanvas.clientHeight || 70; // Match CSS height
+        chartCanvas.height = chartCanvas.clientHeight || 80; // Match CSS height
         console.log(`Scrolling chart canvas resized to ${chartCanvas.width}x${chartCanvas.height}`);
         drawScrollingChart(); // Redraw after resize
     }
 
-    function generateCandleDataSingle(previousClose) {
+    function generateCandleDataSingle(previousClose) { // Renamed
         const randFactor = (max, min = 0) => Math.random() * (max - min) + min;
         let open = previousClose + randFactor(2, -2);
         let close = open + randFactor(chartConfig.volatility, -chartConfig.volatility);
         open = Math.max(chartConfig.yMin, Math.min(chartConfig.yMax, open));
         close = Math.max(chartConfig.yMin, Math.min(chartConfig.yMax, close));
+        // Increase wick randomness
         let high = Math.max(open, close) + randFactor(chartConfig.wickVolatility);
         let low = Math.min(open, close) - randFactor(chartConfig.wickVolatility);
-        high = Math.min(chartConfig.yMax + chartConfig.wickVolatility / 2, high);
-        low = Math.max(chartConfig.yMin - chartConfig.wickVolatility / 2, low);
+        // Adjust clamping for longer wicks possible
+        high = Math.min(chartConfig.yMax + chartConfig.wickVolatility, high);
+        low = Math.max(chartConfig.yMin - chartConfig.wickVolatility, low);
         return { open, high, low, close };
     }
 
-    function mapYChart(value, canvasHeight) {
+    function mapYChart(value, canvasHeight) { // Renamed
         const range = chartConfig.yMax - chartConfig.yMin; if (range <= 0) return canvasHeight / 2;
         const scaledValue = ((value - chartConfig.yMin) / range); return canvasHeight - (scaledValue * canvasHeight);
     }
 
-    function drawScrollingChart() {
+    function drawScrollingChart() { // Renamed
         if (!chartCtx || !chartCanvas || chartData.length === 0) return;
         chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
         const stepX = chartCanvas.width / chartConfig.pointsToShow;
-        const bodyWidth = Math.max(1, stepX * chartConfig.candleBodyWidthRatio); // Ensure bodyWidth is at least 1px
+        const bodyWidth = Math.max(1, stepX * chartConfig.candleBodyWidthRatio);
 
         for (let i = 0; i < chartData.length; i++) {
             const data = chartData[i];
-            const xPos = (i * stepX) + (stepX / 2); // Center candle in its slot
-
+            const xPos = (i * stepX) + (stepX / 2);
             const openY = mapYChart(data.open, chartCanvas.height);
             const highY = mapYChart(data.high, chartCanvas.height);
             const lowY = mapYChart(data.low, chartCanvas.height);
@@ -92,11 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const isUp = data.close >= data.open;
             const color = isUp ? chartConfig.upColor : chartConfig.downColor;
 
-            // Style
             chartCtx.strokeStyle = color; chartCtx.fillStyle = color;
             chartCtx.shadowColor = color; chartCtx.shadowBlur = chartConfig.glowBlur;
             chartCtx.lineWidth = chartConfig.wickWidth;
-
             // Draw Wick
             chartCtx.beginPath(); chartCtx.moveTo(xPos, highY); chartCtx.lineTo(xPos, lowY); chartCtx.stroke();
             // Draw Body
@@ -106,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chartCtx.shadowColor = 'transparent'; chartCtx.shadowBlur = 0;
     }
 
-    function updateAndDrawScrollingChart() {
+    function updateAndDrawScrollingChart() { // Renamed
         if (!chartCtx || !chartCanvas) return;
         const newCandleData = generateCandleDataSingle(lastClose);
         lastClose = newCandleData.close;
@@ -115,17 +117,17 @@ document.addEventListener('DOMContentLoaded', () => {
         drawScrollingChart();
     }
 
-    function startScrollingChartAnimation() {
+    function startScrollingChartAnimation() { // Renamed
         console.log("Starting scrolling chart simulation...");
         if (chartInterval) clearInterval(chartInterval);
         chartData = []; // Reset data array
-        // Initialize with some data points
         let initialClose = (chartConfig.yMin + chartConfig.yMax) / 2;
         for(let i=0; i<chartConfig.pointsToShow; i++){ const candle = generateCandleDataSingle(initialClose); chartData.push(candle); initialClose = candle.close; }
         lastClose = chartData[chartData.length - 1]?.close || initialClose;
 
         if (chartCtx && chartCanvas) {
             resizeChartCanvas(); // Initial size set & draw
+            // Use slower interval
             chartInterval = setInterval(updateAndDrawScrollingChart, chartConfig.updateInterval);
             console.log("Scrolling chart interval started.");
         } else { console.error("Cannot start chart animation - canvas or context missing."); }
@@ -138,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     entryScreen.addEventListener('click', () => {
         console.log("Entry screen clicked!");
         entryScreen.classList.add('hidden'); setTimeout(() => { entryScreen.style.display = 'none'; mainContent.classList.add('visible'); if (volumeContainer) { volumeContainer.classList.add('visible'); } backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); }); updateVolumeUI(); if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); }
-        startScrollingChartAnimation(); // <<< Start Single Scrolling Chart
+        startScrollingChartAnimation(); // Start Single Scrolling Chart
         }, 500);
     }, { once: true });
 

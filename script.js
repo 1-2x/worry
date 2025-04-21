@@ -16,21 +16,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationTextElement = document.getElementById('location-text');
     const typingCursorElement = document.getElementById('typing-cursor');
 
-    // --- Mini Candlestick Elements & State ---
-    const miniCanvas = document.getElementById('mini-chart-canvas');
-    const miniCtx = miniCanvas ? miniCanvas.getContext('2d') : null;
-    let candleInterval = null;
-    const candleConfig = {
-        updateInterval: 1500, // Update every 1.5 seconds
-        priceMin: 10, priceMax: 90, volatility: 20, // Increased volatility
-        wickVolatility: 8, // Increased wick range
-        bodyWidth: 8, // Slightly narrower body
-        wickWidth: 1.5, // Slightly thicker wick
-        neonRed: '#ff0033',
-        neonPurple: '#9d00ff',
-        glowBlur: 5, // Reduced glow slightly
+    // --- Single Scrolling Chart Elements & State ---
+    const chartCanvas = document.getElementById('scrolling-chart-canvas'); // New ID
+    const chartCtx = chartCanvas ? chartCanvas.getContext('2d') : null;
+    console.log("Scrolling Chart Canvas Selected:", chartCanvas);
+
+    let chartInterval = null;
+    let chartData = []; // Single data array
+    const chartConfig = {
+        pointsToShow: 60, // Number of points visible across canvas width
+        updateInterval: 150, // ms between new points (~9 sec cycle for 60 points)
+        yMin: 10, yMax: 90, volatility: 10, wickVolatility: 5,
+        candleBodyWidthRatio: 0.4, // Ratio of stepX
+        wickWidth: 1.5,
+        upColor: '#9d00ff', // Neon Purple UP
+        downColor: '#ff0033', // Neon Red DOWN
+        glowBlur: 5,
     };
-    let lastCandleData = { open: (candleConfig.priceMin + candleConfig.priceMax) / 2, high: (candleConfig.priceMin + candleConfig.priceMax) / 2 + 5, low: (candleConfig.priceMin + candleConfig.priceMax) / 2 - 5, close: (candleConfig.priceMin + candleConfig.priceMax) / 2, };
+    let lastClose = (chartConfig.yMin + chartConfig.yMax) / 2;
+
 
     // --- Global State ---
     let visiblePopupForTilt = null; let lastTrailTime = 0; const trailInterval = 50;
@@ -44,59 +48,113 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationString = "London, UK"; const typeSpeed = 180; const deleteSpeed = 120; const pauseDuration = 2500; let locationCharIndex = 0; let locationIsDeleting = false; let locationLoopTimeout;
     function typeDeleteLoop() { clearTimeout(locationLoopTimeout); const cursor = typingCursorElement; if (!locationTextElement || !cursor) return; if (!locationIsDeleting) { if (locationCharIndex < locationString.length) { const letterSpan = document.createElement('span'); letterSpan.textContent = locationString.charAt(locationCharIndex); locationTextElement.insertBefore(letterSpan, cursor); locationCharIndex++; locationLoopTimeout = setTimeout(typeDeleteLoop, typeSpeed); } else { locationIsDeleting = true; if (cursor) cursor.style.animationPlayState = 'paused'; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration); } } else { const letterSpans = locationTextElement.querySelectorAll('span:not(#typing-cursor)'); if (letterSpans.length > 0) { if (cursor) cursor.style.animationPlayState = 'running'; locationTextElement.removeChild(letterSpans[letterSpans.length - 1]); locationLoopTimeout = setTimeout(typeDeleteLoop, deleteSpeed); } else { locationIsDeleting = false; locationCharIndex = 0; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration / 2); } } }
 
-    // --- Mini Candlestick Logic START ---
-    function resizeMiniCanvas() { if (!miniCanvas) return; const container = miniCanvas.parentElement; miniCanvas.width = miniCanvas.clientWidth || 80; miniCanvas.height = miniCanvas.clientHeight || 50; drawCandlestick(lastCandleData); } // No console log needed now
-    function generateNextCandleData(previousCandle) { const randFactor = (max, min = 0) => Math.random() * (max - min) + min; const prevClose = previousCandle.close; let open = prevClose + randFactor(2, -2); let close = open + randFactor(candleConfig.volatility, -candleConfig.volatility); open = Math.max(candleConfig.priceMin, Math.min(candleConfig.priceMax, open)); close = Math.max(candleConfig.priceMin, Math.min(candleConfig.priceMax, close)); let high = Math.max(open, close) + randFactor(candleConfig.wickVolatility); let low = Math.min(open, close) - randFactor(candleConfig.wickVolatility); high = Math.min(candleConfig.priceMax + candleConfig.wickVolatility, high); low = Math.max(candleConfig.priceMin - candleConfig.wickVolatility, low); return { open, high, low, close }; }
-    function mapY(value, canvasHeight) { const range = candleConfig.priceMax - candleConfig.priceMin; if (range <= 0) return canvasHeight / 2; const scaledValue = ((value - candleConfig.priceMin) / range); return canvasHeight - (scaledValue * canvasHeight); }
+    // --- Scrolling Chart Simulation Logic START ---
+    function resizeChartCanvas() {
+        if (!chartCanvas) return;
+        chartCanvas.width = chartCanvas.clientWidth || 300; // Use CSS width or default
+        chartCanvas.height = chartCanvas.clientHeight || 60; // Use CSS height or default
+        console.log(`Scrolling chart canvas resized to ${chartCanvas.width}x${chartCanvas.height}`);
+        drawScrollingChart(); // Redraw after resize
+    }
 
-    function drawCandlestick(data) {
-        if (!miniCtx || !miniCanvas) return;
-        const { open, high, low, close } = data;
-        const width = miniCanvas.width; const height = miniCanvas.height;
-        const bodyWidth = candleConfig.bodyWidth; const centerX = width / 2;
-        miniCtx.clearRect(0, 0, width, height);
-        const openY = mapY(open, height); const highY = mapY(high, height);
-        const lowY = mapY(low, height); const closeY = mapY(close, height);
-        const isUp = close >= open;
-        const color = isUp ? candleConfig.neonPurple : candleConfig.neonRed;
+    function generateCandleDataSingle(previousClose) { // Renamed
+        const randFactor = (max, min = 0) => Math.random() * (max - min) + min;
+        let open = previousClose + randFactor(2, -2);
+        let close = open + randFactor(chartConfig.volatility, -chartConfig.volatility);
+        open = Math.max(chartConfig.yMin, Math.min(chartConfig.yMax, open));
+        close = Math.max(chartConfig.yMin, Math.min(chartConfig.yMax, close));
+        let high = Math.max(open, close) + randFactor(chartConfig.wickVolatility);
+        let low = Math.min(open, close) - randFactor(chartConfig.wickVolatility);
+        high = Math.min(chartConfig.yMax + chartConfig.wickVolatility / 2, high);
+        low = Math.max(chartConfig.yMin - chartConfig.wickVolatility / 2, low);
+        return { open, high, low, close };
+    }
 
-        // Style for glow
-        miniCtx.shadowColor = color; miniCtx.shadowBlur = candleConfig.glowBlur;
+    function mapYChart(value, canvasHeight) { // Renamed
+        const range = chartConfig.yMax - chartConfig.yMin;
+        if (range <= 0) return canvasHeight / 2;
+        const scaledValue = ((value - chartConfig.yMin) / range);
+        return canvasHeight - (scaledValue * canvasHeight);
+    }
 
-        // Draw Wick
-        miniCtx.strokeStyle = color; miniCtx.lineWidth = candleConfig.wickWidth; // Use configured wick width
-        miniCtx.beginPath(); miniCtx.moveTo(centerX, highY); miniCtx.lineTo(centerX, lowY); miniCtx.stroke();
+    function drawScrollingChart() { // Renamed
+        if (!chartCtx || !chartCanvas || chartData.length === 0) return;
 
-        // Draw Body
-        miniCtx.fillStyle = color; miniCtx.beginPath();
-        const bodyHeight = Math.abs(openY - closeY); const bodyY = Math.min(openY, closeY);
-        miniCtx.rect(centerX - bodyWidth / 2, bodyY, bodyWidth, bodyHeight <= 0 ? 1 : bodyHeight);
-        miniCtx.fill();
+        chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+        const stepX = chartCanvas.width / chartConfig.pointsToShow;
+        const bodyWidth = stepX * chartConfig.candleBodyWidthRatio;
 
+        for (let i = 0; i < chartData.length; i++) {
+            const data = chartData[i];
+            const xPos = (i * stepX) + (stepX / 2); // Center candle in its slot
+
+            const openY = mapYChart(data.open, chartCanvas.height);
+            const highY = mapYChart(data.high, chartCanvas.height);
+            const lowY = mapYChart(data.low, chartCanvas.height);
+            const closeY = mapYChart(data.close, chartCanvas.height);
+            const isUp = data.close >= data.open;
+            const color = isUp ? chartConfig.upColor : chartConfig.downColor;
+
+            // Style
+            chartCtx.strokeStyle = color; chartCtx.fillStyle = color;
+            chartCtx.shadowColor = color; chartCtx.shadowBlur = chartConfig.glowBlur;
+
+            // Draw Wick
+            chartCtx.lineWidth = chartConfig.wickWidth;
+            chartCtx.beginPath(); chartCtx.moveTo(xPos, highY); chartCtx.lineTo(xPos, lowY); chartCtx.stroke();
+
+            // Draw Body
+            chartCtx.beginPath();
+            const bodyHeight = Math.max(1, Math.abs(openY - closeY)); // Min height 1px
+            const bodyY = Math.min(openY, closeY);
+            chartCtx.rect(xPos - bodyWidth / 2, bodyY, bodyWidth, bodyHeight);
+            chartCtx.fill();
+        }
         // Reset shadow
-        miniCtx.shadowColor = 'transparent'; miniCtx.shadowBlur = 0;
+        chartCtx.shadowColor = 'transparent'; chartCtx.shadowBlur = 0;
     }
 
-    function simulateAndUpdateCandle() { lastCandleData = generateNextCandleData(lastCandleData); drawCandlestick(lastCandleData); }
-
-    function startCandleAnimation() {
-        console.log("Starting candlestick simulation setup...");
-        if (candleInterval) clearInterval(candleInterval);
-        if (miniCtx && miniCanvas) {
-            resizeMiniCanvas(); // Initial size set & draw
-            // *** RE-ENABLE the interval ***
-            candleInterval = setInterval(simulateAndUpdateCandle, candleConfig.updateInterval);
-            console.log("Candlestick update interval STARTED.");
-        } else { console.error("Cannot start candle animation - canvas or context missing."); }
-        window.addEventListener('resize', resizeMiniCanvas);
+    function updateAndDrawScrollingChart() { // Renamed
+        if (!chartCtx || !chartCanvas) return;
+        const newCandleData = generateCandleDataSingle(lastClose);
+        lastClose = newCandleData.close; // Update global lastClose
+        chartData.push(newCandleData);
+        while (chartData.length > chartConfig.pointsToShow) { chartData.shift(); }
+        drawScrollingChart();
     }
-    // --- Mini Candlestick Logic END ---
+
+    function startScrollingChartAnimation() { // Renamed
+        console.log("Starting scrolling chart simulation...");
+        if (chartInterval) clearInterval(chartInterval);
+        chartData = []; // Reset data
+
+        // Initialize with some data points
+        let initialClose = (chartConfig.yMin + chartConfig.yMax) / 2;
+        for(let i=0; i<chartConfig.pointsToShow; i++){
+            const candle = generateCandleDataSingle(initialClose);
+            chartData.push(candle);
+            initialClose = candle.close;
+        }
+         lastClose = chartData[chartData.length - 1]?.close || initialClose;
+
+        if (chartCtx && chartCanvas) {
+            resizeChartCanvas(); // Initial size set & draw
+            chartInterval = setInterval(updateAndDrawScrollingChart, chartConfig.updateInterval);
+            console.log("Scrolling chart interval started.");
+        } else { console.error("Cannot start chart animation - canvas or context missing."); }
+        window.addEventListener('resize', resizeChartCanvas);
+    }
+    // --- Scrolling Chart Simulation Logic END ---
+
 
     // --- Entry Screen Logic ---
     entryScreen.addEventListener('click', () => {
         console.log("Entry screen clicked!");
-        entryScreen.classList.add('hidden'); setTimeout(() => { entryScreen.style.display = 'none'; mainContent.classList.add('visible'); if (volumeContainer) { volumeContainer.classList.add('visible'); } backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); }); updateVolumeUI(); if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); } startCandleAnimation(); }, 500);
+        entryScreen.classList.add('hidden'); setTimeout(() => { entryScreen.style.display = 'none'; mainContent.classList.add('visible'); if (volumeContainer) { volumeContainer.classList.add('visible'); } backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); }); updateVolumeUI(); if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); }
+        startScrollingChartAnimation(); // <<< Start Scrolling Chart
+        }, 500);
     }, { once: true });
+
 
     // --- Cursor Tracking, Popup Tilt, Falling Trail ---
     document.addEventListener('mousemove', (e) => { if (customCursor) { customCursor.style.left = `${e.clientX}px`; customCursor.style.top = `${e.clientY}px`; } if(visiblePopupForTilt) { tiltPopup(e, visiblePopupForTilt); } const now = Date.now(); if (now - lastTrailTime > trailInterval) { createFallingTrailChar(e.clientX, e.clientY); lastTrailTime = now; } });
@@ -119,6 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('contextmenu', event => event.preventDefault());
 
     // --- Close Popups when Clicking Outside Logic ---
-    document.addEventListener('click', function(event) { let clickedInsideAnyPopup = false; allPopups.forEach(p => { if (p.contains(event.target)) { clickedInsideAnyPopup = true; } }); let clickedOnAnyTrigger = false; popupTriggers.forEach(t => { if (t.contains(event.target)) { clickedOnAnyTrigger = true; } }); const volumeControl = document.getElementById('volume-control-container'); const isClickInsideVolume = volumeControl ? volumeControl.contains(event.target) : false; const miniChart = document.getElementById('mini-chart-canvas'); const isClickInsideMiniChart = miniChart ? miniChart.contains(event.target) : false; if (!clickedInsideAnyPopup && !clickedOnAnyTrigger && !isClickInsideVolume && !isClickInsideMiniChart) { closeAllPopups(); } });
+    document.addEventListener('click', function(event) { let clickedInsideAnyPopup = false; allPopups.forEach(p => { if (p.contains(event.target)) { clickedInsideAnyPopup = true; } }); let clickedOnAnyTrigger = false; popupTriggers.forEach(t => { if (t.contains(event.target)) { clickedOnAnyTrigger = true; } }); const volumeControl = document.getElementById('volume-control-container'); const isClickInsideVolume = volumeControl ? volumeControl.contains(event.target) : false; const miniChart = document.getElementById('scrolling-chart-canvas'); /* <<< Use correct ID */ const isClickInsideMiniChart = miniChart ? miniChart.contains(event.target) : false; if (!clickedInsideAnyPopup && !clickedOnAnyTrigger && !isClickInsideVolume && !isClickInsideMiniChart) { closeAllPopups(); } });
 
 }); // End of DOMContentLoaded listener

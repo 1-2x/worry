@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const entryScreen = document.getElementById('entry-screen');
     const mainContent = document.getElementById('main-content');
     const backgroundMusic = document.getElementById('background-music');
-    const customCursor = document.getElementById('custom-cursor'); // Re-select
+    const customCursor = document.getElementById('custom-cursor');
     const popupTriggers = document.querySelectorAll('.popup-trigger');
     const allPopups = document.querySelectorAll('.popup-menu');
     const visitCountSpan = document.getElementById('visit-count');
@@ -17,16 +17,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const typingCursorElement = document.getElementById('typing-cursor');
 
     // --- Ticker Bar Elements & State ---
-    // Selecting containers, but logic is simplified below
     const tickerContainerLeft = document.getElementById('ticker-container-left');
     const tickerContainerRight = document.getElementById('ticker-container-right');
-    console.log("Ticker Containers Selected:", tickerContainerLeft, tickerContainerRight);
+    console.log("Ticker Containers Selected:", tickerContainerLeft, tickerContainerRight); // Check selection
 
     let tickerIntervalLeft = null;
     let tickerIntervalRight = null;
     const tickerConfig = {
         maxBars: 35, updateInterval: 300, minHeight: 10, maxHeight: 70,
-        upColorClass: 'bar-up', downColorClass: 'bar-down'
+        upColorClass: 'bar-up', // Class name for violet bars
+        downColorClass: 'bar-down' // Class name for purple bars (optional, default style is purple)
     };
     let lastValueLeft = { value: tickerConfig.maxHeight / 2 };
     let lastValueRight = { value: tickerConfig.maxHeight / 2 };
@@ -47,37 +47,68 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Ticker Bar Simulation Logic START (Corrected) ---
     function updateTicker(container, lastValueState) {
         if (!container) {
-             console.error("Ticker container missing in updateTicker!"); // Added check
+             // Should not happen now based on console log, but safe check
+             // console.error("Ticker container missing in updateTicker!");
              return;
         }
 
+        // 1. Generate new bar data
         const newHeight = Math.random() * (tickerConfig.maxHeight - tickerConfig.minHeight) + tickerConfig.minHeight;
-        const currentValue = newHeight; const isUp = currentValue >= lastValueState.value; lastValueState.value = currentValue;
-        const bar = document.createElement('div'); bar.classList.add('ticker-bar');
-        // // Apply classes based on up/down - enable AFTER basic bars appear
-        // bar.classList.add(isUp ? tickerConfig.upColorClass : tickerConfig.downColorClass);
-        bar.style.height = `${newHeight}px`; // JS sets height, CSS debug overrides atm
+        const currentValue = newHeight;
+        const isUp = currentValue >= lastValueState.value;
+        lastValueState.value = currentValue; // Update state for next comparison
 
-        // console.log(`Adding bar to ${container.id}, height: ${newHeight.toFixed(0)}px`);
+        // 2. Create new bar element (div)
+        const bar = document.createElement('div');
+        bar.classList.add('ticker-bar'); // Apply base style
 
-        container.insertBefore(bar, container.firstChild); // Add bar to DOM
+        // *** ADD class based on direction ***
+        if (isUp) {
+            bar.classList.add(tickerConfig.upColorClass); // Add 'bar-up' for violet
+        }
+        // No need to add 'bar-down' class if base style is already purple
 
-        while (container.children.length > tickerConfig.maxBars) { if (container.lastChild) { container.removeChild(container.lastChild); } else { break; } }
+        bar.style.height = `${newHeight}px`; // Set random height
+
+        // console.log(`Adding bar to ${container.id}, height: ${newHeight.toFixed(0)}px`); // Optional log
+
+        // 3. Add new bar to the beginning of the container
+        container.insertBefore(bar, container.firstChild);
+
+        // 4. Remove oldest bar if container is full
+        while (container.children.length > tickerConfig.maxBars) {
+            if (container.lastChild) {
+                 container.removeChild(container.lastChild);
+            } else {
+                break;
+            }
+        }
     }
 
     function startTickerAnimation() {
         console.log("Starting CORRECT ticker bar animation...");
-        if (tickerIntervalLeft) clearInterval(tickerIntervalLeft); if (tickerIntervalRight) clearInterval(tickerIntervalRight);
-        lastValueLeft = { value: tickerConfig.maxHeight / 2 }; lastValueRight = { value: tickerConfig.maxHeight / 2 };
+        if (tickerIntervalLeft) clearInterval(tickerIntervalLeft);
+        if (tickerIntervalRight) clearInterval(tickerIntervalRight);
+
+        // Reset state objects
+        lastValueLeft = { value: tickerConfig.maxHeight / 2 };
+        lastValueRight = { value: tickerConfig.maxHeight / 2 };
 
         // Check containers *before* setting interval
         if (tickerContainerLeft) {
+            // Clear any previous bars immediately
+            tickerContainerLeft.innerHTML = '';
             tickerIntervalLeft = setInterval(() => updateTicker(tickerContainerLeft, lastValueLeft), tickerConfig.updateInterval);
             console.log("Left ticker interval started.");
         } else { console.error("Cannot start Left ticker: container not found!"); }
 
         if (tickerContainerRight) {
-            setTimeout(() => { tickerIntervalRight = setInterval(() => updateTicker(tickerContainerRight, lastValueRight), tickerConfig.updateInterval + 20); console.log("Right ticker interval started."); }, 300);
+            // Clear any previous bars immediately
+             tickerContainerRight.innerHTML = '';
+            setTimeout(() => {
+                 tickerIntervalRight = setInterval(() => updateTicker(tickerContainerRight, lastValueRight), tickerConfig.updateInterval + 20);
+                 console.log("Right ticker interval started.");
+            }, 300); // Keep slight delay for visual difference
         } else { console.error("Cannot start Right ticker: container not found!"); }
     }
     // --- Ticker Bar Simulation Logic END ---

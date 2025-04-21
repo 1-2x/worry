@@ -10,9 +10,6 @@
 <body>
     <div id="custom-cursor"></div>
 
-    <div id="ticker-container-left" class="ticker-container"></div>
-    <div id="ticker-container-right" class="ticker-container"></div>
-
     <div id="entry-screen">
         <p>Click to Enter</p>
     </div>
@@ -34,16 +31,21 @@ WW   W  WW OO  OO RRRR   RRRR    YYYY
         <div id="tiktok-popup" class="popup-menu hidden">
              <div class="popup-row"><a href="https://www.tiktok.com/@expertsly" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="TikTok User 1"><i class="fab fa-tiktok popup-icon"></i><span class="popup-text multicolor-neon"><span>e</span><span>x</span><span>p</span><span>e</span><span>r</span><span>t</span><span>s</span><span>l</span><span>y</span></span></a></div>
              <div class="popup-row"><a href="https://www.tiktok.com/@worry.rip" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="TikTok User 2"><i class="fab fa-tiktok popup-icon"></i><span class="popup-text multicolor-neon"><span>w</span><span>o</span><span>r</span><span>r</span><span>y</span><span>.</span><span>r</span><span>i</span><span>p</span></span></a></div>
-        </div>
+         </div>
         <div id="discord-popup" class="popup-menu hidden">
             <div class="popup-row"><a href="https://discord.com/users/1265799421417754664" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="Discord User 1"><i class="fab fa-discord popup-icon"></i><span class="popup-text multicolor-neon"><span>w</span><span>r</span><span>y</span><span>.</span><span>r</span><span>i</span><span>p</span></span></a></div>
             <div class="popup-row"><a href="https://discord.com/users/397485438631411712" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="Discord User 2"><i class="fab fa-discord popup-icon"></i><span class="popup-text multicolor-neon"><span>y</span><span>b</span><span>c</span><span>a</span><span>n</span><span>d</span><span>y</span></span></a></div>
             <div class="popup-row"><a href="https://discord.com/users/1202318974109614111" target="_blank" rel="noopener noreferrer" class="popup-link" aria-label="Discord User 3"><i class="fab fa-discord popup-icon"></i><span class="popup-text multicolor-neon"><span>z</span><span>v</span><span>z</span><span>h</span></span></a></div>
+         </div>
+
+        <div id="bottom-elements">
+            <div id="view-counter-area">
+                <i class="fa-solid fa-eye" id="color-changing-eye"></i>
+                <span id="visit-count">0</span>
+            </div>
+            <canvas id="mini-chart-canvas"></canvas>
         </div>
-        <div id="view-counter-area">
-            <i class="fa-solid fa-eye" id="color-changing-eye"></i>
-            <span id="visit-count">0</span>
-        </div>
+
     </div>
 
     <audio id="background-music" loop> <source src="Crystal Castles _ it fit when i was a kid.mp3" type="audio/mpeg"> Your browser does not support the audio element. </audio>

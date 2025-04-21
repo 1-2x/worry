@@ -17,26 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const typingCursorElement = document.getElementById('typing-cursor');
 
     // --- Scrolling Chart Elements & State ---
-    const chartCanvas = document.getElementById('scrolling-chart-canvas'); // Get the single canvas
+    const chartCanvas = document.getElementById('scrolling-chart-canvas');
     const chartCtx = chartCanvas ? chartCanvas.getContext('2d') : null;
     console.log("Scrolling Chart Canvas Selected:", chartCanvas);
 
     let chartInterval = null;
     let chartData = [];
-    const chartConfig = {
-        pointsToShow: 70, // Number of points visible across canvas width (adjust for new width 350px)
-        updateInterval: 250, // Slower update interval (e.g., 70 * 250ms = 17.5s cycle)
-        yMin: 10, yMax: 90,
-        volatility: 10, // Keep volatility reasonable
-        wickVolatility: 15, // Increased wick volatility for longer lines
-        candleBodyWidthRatio: 0.3, // Smaller body width relative to step
-        wickWidth: 1.5,
-        upColor: '#9d00ff', // Neon Purple UP
-        downColor: '#ff0033', // Neon Red DOWN
-        glowBlur: 5,
-    };
+    const chartConfig = { pointsToShow: 60, updateInterval: 150, yMin: 10, yMax: 90, volatility: 10, wickVolatility: 15, candleBodyWidthRatio: 0.3, wickWidth: 1.5, upColor: '#9d00ff', downColor: '#ff0033', glowBlur: 5, };
     let lastClose = (chartConfig.yMin + chartConfig.yMax) / 2;
-
 
     // --- Global State ---
     let visiblePopupForTilt = null; let lastTrailTime = 0; const trailInterval = 50;
@@ -52,43 +40,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Scrolling Chart Simulation Logic START ---
-    function resizeChartCanvas() { // Renamed
-        if (!chartCanvas) return;
-        chartCanvas.width = chartCanvas.clientWidth || 350; // Match CSS width
-        chartCanvas.height = chartCanvas.clientHeight || 80; // Match CSS height
-        console.log(`Scrolling chart canvas resized to ${chartCanvas.width}x${chartCanvas.height}`);
-        drawScrollingChart(); // Redraw after resize
-    }
+    function resizeChartCanvas() { if (!chartCanvas) return; chartCanvas.width = chartCanvas.clientWidth || 350; chartCanvas.height = chartCanvas.clientHeight || 80; console.log(`Scrolling chart canvas resized to ${chartCanvas.width}x${chartCanvas.height}`); drawScrollingChart(); }
+    function generateCandleDataSingle(previousClose) { const randFactor = (max, min = 0) => Math.random() * (max - min) + min; let open = previousClose + randFactor(2, -2); let close = open + randFactor(chartConfig.volatility, -chartConfig.volatility); open = Math.max(chartConfig.yMin, Math.min(chartConfig.yMax, open)); close = Math.max(chartConfig.yMin, Math.min(chartConfig.yMax, close)); let high = Math.max(open, close) + randFactor(chartConfig.wickVolatility); let low = Math.min(open, close) - randFactor(chartConfig.wickVolatility); high = Math.min(chartConfig.yMax + chartConfig.wickVolatility, high); low = Math.max(chartConfig.yMin - chartConfig.wickVolatility, low); return { open, high, low, close }; }
+    function mapYChart(value, canvasHeight) { const range = chartConfig.yMax - chartConfig.yMin; if (range <= 0) return canvasHeight / 2; const scaledValue = ((value - chartConfig.yMin) / range); return canvasHeight - (scaledValue * canvasHeight); }
 
-    function generateCandleDataSingle(previousClose) { // Renamed
-        const randFactor = (max, min = 0) => Math.random() * (max - min) + min;
-        let open = previousClose + randFactor(2, -2);
-        let close = open + randFactor(chartConfig.volatility, -chartConfig.volatility);
-        open = Math.max(chartConfig.yMin, Math.min(chartConfig.yMax, open));
-        close = Math.max(chartConfig.yMin, Math.min(chartConfig.yMax, close));
-        // Increase wick randomness
-        let high = Math.max(open, close) + randFactor(chartConfig.wickVolatility);
-        let low = Math.min(open, close) - randFactor(chartConfig.wickVolatility);
-        // Adjust clamping for longer wicks possible
-        high = Math.min(chartConfig.yMax + chartConfig.wickVolatility, high);
-        low = Math.max(chartConfig.yMin - chartConfig.wickVolatility, low);
-        return { open, high, low, close };
-    }
-
-    function mapYChart(value, canvasHeight) { // Renamed
-        const range = chartConfig.yMax - chartConfig.yMin; if (range <= 0) return canvasHeight / 2;
-        const scaledValue = ((value - chartConfig.yMin) / range); return canvasHeight - (scaledValue * canvasHeight);
-    }
-
-    function drawScrollingChart() { // Renamed
+    // --- Modified draw function with extensive logging ---
+    function drawScrollingChart() {
         if (!chartCtx || !chartCanvas || chartData.length === 0) return;
+        console.log(`--- Drawing Chart (${chartCanvas.id}) Frame ---`); // Log frame start
+
         chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
         const stepX = chartCanvas.width / chartConfig.pointsToShow;
         const bodyWidth = Math.max(1, stepX * chartConfig.candleBodyWidthRatio);
 
+        // *** Draw Test Square ***
+        chartCtx.fillStyle = 'yellow';
+        chartCtx.fillRect(5, 5, 20, 20); // Draw small yellow square at top-left
+        console.log("   - Drew yellow debug square.");
+
         for (let i = 0; i < chartData.length; i++) {
             const data = chartData[i];
             const xPos = (i * stepX) + (stepX / 2);
+
             const openY = mapYChart(data.open, chartCanvas.height);
             const highY = mapYChart(data.high, chartCanvas.height);
             const lowY = mapYChart(data.low, chartCanvas.height);
@@ -96,9 +69,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const isUp = data.close >= data.open;
             const color = isUp ? chartConfig.upColor : chartConfig.downColor;
 
+            // Log calculated values for the first candle each frame
+            if (i === 0) {
+                 console.log(`   - Candle[0]: O=${data.open.toFixed(1)} H=${data.high.toFixed(1)} L=${data.low.toFixed(1)} C=${data.close.toFixed(1)}`);
+                 console.log(`   - Mapped Ys: openY=${openY.toFixed(1)} highY=${highY.toFixed(1)} lowY=${lowY.toFixed(1)} closeY=${closeY.toFixed(1)}`);
+                 console.log(`   - Drawing Style: color=${color}, wickWidth=${chartConfig.wickWidth}, bodyWidth=${bodyWidth.toFixed(1)}`);
+            }
+
+            // Style
             chartCtx.strokeStyle = color; chartCtx.fillStyle = color;
             chartCtx.shadowColor = color; chartCtx.shadowBlur = chartConfig.glowBlur;
             chartCtx.lineWidth = chartConfig.wickWidth;
+
             // Draw Wick
             chartCtx.beginPath(); chartCtx.moveTo(xPos, highY); chartCtx.lineTo(xPos, lowY); chartCtx.stroke();
             // Draw Body
@@ -106,9 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
             chartCtx.rect(xPos - bodyWidth / 2, bodyY, bodyWidth, bodyHeight); chartCtx.fill();
         }
         chartCtx.shadowColor = 'transparent'; chartCtx.shadowBlur = 0;
+        console.log(`--- Finished Drawing Chart (${chartCanvas.id}) Frame ---`); // Log frame end
     }
 
-    function updateAndDrawScrollingChart() { // Renamed
+    function updateAndDrawScrollingChart() {
         if (!chartCtx || !chartCanvas) return;
         const newCandleData = generateCandleDataSingle(lastClose);
         lastClose = newCandleData.close;
@@ -117,17 +100,16 @@ document.addEventListener('DOMContentLoaded', () => {
         drawScrollingChart();
     }
 
-    function startScrollingChartAnimation() { // Renamed
+    function startScrollingChartAnimation() {
         console.log("Starting scrolling chart simulation...");
         if (chartInterval) clearInterval(chartInterval);
-        chartData = []; // Reset data array
+        chartData = [];
         let initialClose = (chartConfig.yMin + chartConfig.yMax) / 2;
         for(let i=0; i<chartConfig.pointsToShow; i++){ const candle = generateCandleDataSingle(initialClose); chartData.push(candle); initialClose = candle.close; }
         lastClose = chartData[chartData.length - 1]?.close || initialClose;
 
         if (chartCtx && chartCanvas) {
-            resizeChartCanvas(); // Initial size set & draw
-            // Use slower interval
+            resizeChartCanvas();
             chartInterval = setInterval(updateAndDrawScrollingChart, chartConfig.updateInterval);
             console.log("Scrolling chart interval started.");
         } else { console.error("Cannot start chart animation - canvas or context missing."); }
@@ -137,13 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Entry Screen Logic ---
-    entryScreen.addEventListener('click', () => {
-        console.log("Entry screen clicked!");
-        entryScreen.classList.add('hidden'); setTimeout(() => { entryScreen.style.display = 'none'; mainContent.classList.add('visible'); if (volumeContainer) { volumeContainer.classList.add('visible'); } backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); }); updateVolumeUI(); if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); }
-        startScrollingChartAnimation(); // Start Single Scrolling Chart
-        }, 500);
-    }, { once: true });
-
+    entryScreen.addEventListener('click', () => { console.log("Entry screen clicked!"); entryScreen.classList.add('hidden'); setTimeout(() => { entryScreen.style.display = 'none'; mainContent.classList.add('visible'); if (volumeContainer) { volumeContainer.classList.add('visible'); } backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); }); updateVolumeUI(); if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); } startScrollingChartAnimation(); }, 500); }, { once: true });
 
     // --- Cursor Tracking, Popup Tilt, Falling Trail ---
     document.addEventListener('mousemove', (e) => { if (customCursor) { customCursor.style.left = `${e.clientX}px`; customCursor.style.top = `${e.clientY}px`; } if(visiblePopupForTilt) { tiltPopup(e, visiblePopupForTilt); } const now = Date.now(); if (now - lastTrailTime > trailInterval) { createFallingTrailChar(e.clientX, e.clientY); lastTrailTime = now; } });

@@ -59,17 +59,17 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 /* Scrolling Candlestick Canvas */
 #scrolling-chart-canvas {
     position: fixed;
-    bottom: 35px;
-    left: 50%;
+    bottom: 35px; /* Position slightly above the view counter */
+    left: 50%; /* Center horizontally */
     transform: translateX(-50%);
-    width: 350px;
-    height: 80px;
-    background-color: transparent; /* Make background transparent */
-    border: none;
-    z-index: 9000 !important; /* <<< FORCE TO VERY TOP LAYER (below cursor) */
+    width: 350px; /* Wider canvas */
+    height: 80px; /* Taller canvas */
+    background-color: #000; /* Black background */
+    border: none; /* No border */
+    z-index: 49; /* Below counter */
     opacity: 0;
     transition: opacity 0.5s ease 1.5s;
-    /* filter: drop-shadow(0 0 5px rgba(157, 0, 255, 0.5)); REMOVED filter */
+    filter: drop-shadow(0 0 6px rgba(157, 0, 255, 0.6)); /* Neon glow for chart */
     pointer-events: none;
 }
 #main-content.visible #scrolling-chart-canvas {
@@ -99,3 +99,5 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 /* --- Falling Character Trail (𖹭) --- */
 .trail-cursor-char { position: fixed; pointer-events: none; z-index: 9998; opacity: 1; font-size: 1.5rem; line-height: 1; transform: translate(-50%, -50%); animation: cursor-color-change-text 4s linear infinite, fall-fade-char 1.0s linear forwards; }
 @keyframes fall-fade-char { 0% { transform: translate(-50%, -50%) translateY(0); opacity: 1; } 100% { transform: translate(-50%, -50%) translateY(30vh); opacity: 0; } }
+
+/* Ticker/Chart Styles REMOVED */

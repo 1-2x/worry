@@ -3,16 +3,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const entryScreen = document.getElementById('entry-screen');
     const mainContent = document.getElementById('main-content');
-    // Keep background music element selected if needed for other tests
-    const backgroundMusic = document.getElementById('background-music');
+    const backgroundMusic = document.getElementById('background-music'); // Keep for potential play test
 
     // --- Entry Screen Logic ---
+    if (!entryScreen) {
+        console.error("FATAL: Entry Screen element not found!");
+        return; // Stop script if entry screen is missing
+    }
+
     entryScreen.addEventListener('click', () => {
         console.log("Entry screen clicked!");
         entryScreen.classList.add('hidden');
+
         setTimeout(() => {
             entryScreen.style.display = 'none';
-            mainContent.classList.add('visible');
+
+            if (mainContent) {
+                 mainContent.classList.add('visible');
+                 console.log("Main content should be visible.");
+            } else {
+                 console.error("Main Content element not found when trying to make visible!");
+            }
 
             // --- Simple Canvas Draw Test START ---
             console.log("Attempting static canvas draw...");
@@ -42,12 +53,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- Simple Canvas Draw Test END ---
 
             // Play music (optional for this test)
-            // backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); });
+             if(backgroundMusic) {
+                backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); });
+             }
 
         }, 500);
     }, { once: true });
 
-    // --- All other features TEMPORARILY DISABLED ---
-    // (Cursor, Trail, Popups, Volume, Location Typing, Counter, Title Animation, Right Click Disable)
+    console.log("Entry screen listener added.");
+
+    // --- All other features (cursor, trail, popups, volume, typing, etc.) are DISABLED in this version ---
 
 }); // End of DOMContentLoaded listener

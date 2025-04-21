@@ -8,7 +8,7 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 #entry-screen.hidden { opacity: 0; pointer-events: none; }
 
 /* Main Content Area */
-#main-content { display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease-in; /* Adjust padding for bottom elements */ padding-bottom: 100px; position: relative; perspective: 1000px; z-index: 10; }
+#main-content { display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease-in; padding-bottom: 100px; /* Increased padding for bottom elements */ position: relative; perspective: 1000px; z-index: 10; }
 #main-content.visible { display: flex; opacity: 1; }
 
 /* Location Indicator */
@@ -49,24 +49,15 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 .multicolor-neon span:nth-child(2) { animation-delay: 0.2s; } .multicolor-neon span:nth-child(3) { animation-delay: 0.4s; } .multicolor-neon span:nth-child(4) { animation-delay: 0.6s; } .multicolor-neon span:nth-child(5) { animation-delay: 0.8s; } .multicolor-neon span:nth-child(6) { animation-delay: 1.0s; } .multicolor-neon span:nth-child(7) { animation-delay: 1.2s; } .multicolor-neon span:nth-child(8) { animation-delay: 1.4s; } .multicolor-neon span:nth-child(9) { animation-delay: 1.6s; }
 @keyframes multicolor-letter-glow { 0% { color: #ff0000; } 20% { color: #9d00ff; } 40% { color: #0000ff; } 60% { color: #ff00ff; } 80% { color: #00ffff; } 100% { color: #ff0000; } }
 
-/* --- Bottom Elements Wrapper --- */
-#bottom-elements {
-    position: fixed;
-    bottom: 10px; /* Position container at bottom */
-    left: 0; right: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Center children horizontally */
-    gap: 5px;
-    z-index: 50;
-    pointer-events: none; /* Allow clicks through wrapper */
-}
+/* Bottom Elements Container REMOVED */
 
-/* Fake View Counter Area (positioned by parent) */
+/* Fake View Counter Area (Fixed Position) */
 #view-counter-area {
-    /* No fixed positioning needed */
-    color: white; display: flex; justify-content: center; align-items: center; gap: 8px;
-    pointer-events: auto; /* Allow interaction if needed */
+    position: fixed;
+    bottom: 10px; /* At the very bottom */
+    left: 0; right: 0; text-align: center;
+    z-index: 50; color: white; display: flex; justify-content: center; align-items: center; gap: 8px;
+    pointer-events: none; /* Allow clicks through */
 }
 #color-changing-eye { font-size: 0.9rem; animation: color-change-eye 4s linear infinite alternate; }
 #visit-count { font-size: 0.8rem; color: white; font-family: 'Courier New', Courier, monospace; min-width: 10px; animation: counter-color-change 5s linear infinite alternate; text-shadow: 0 0 3px currentColor, 0 0 6px currentColor; }
@@ -75,19 +66,23 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 
 /* Scrolling Candlestick Canvas */
 #scrolling-chart-canvas {
-    display: block;
-    width: 300px; /* Wider canvas */
-    height: 60px; /* Adjust height */
+    position: fixed;
+    bottom: 35px; /* Position slightly above the view counter */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Center horizontally */
+    width: 350px; /* <<< MADE WIDER */
+    height: 70px; /* <<< MADE TALLER */
     background-color: #000; /* Black background */
+    z-index: 49; /* Below counter but above body */
     opacity: 0; /* Hidden initially */
     transition: opacity 0.5s ease 1.5s; /* Fade in slower */
-    filter: drop-shadow(0 0 5px rgba(157, 0, 255, 0.5)); /* Optional glow */
-    pointer-events: auto; /* Allow interaction if needed */
+    filter: drop-shadow(0 0 6px rgba(157, 0, 255, 0.6)); /* Neon glow */
+    border: none; /* No border */
+    pointer-events: none; /* Ignore clicks */
 }
 #main-content.visible #scrolling-chart-canvas {
-     opacity: 0.85;
+     opacity: 0.9;
 }
-
 
 /* --- Volume Control --- */
 #volume-control-container { position: fixed; top: 15px; left: 15px; background-color: rgba(40, 30, 50, 0.6); border-radius: 25px; padding: 5px; display: flex; align-items: center; z-index: 1100; backdrop-filter: blur(3px); border: 1px solid rgba(255, 255, 255, 0.1); opacity: 0; visibility: hidden; transition: opacity 0.4s ease 0.5s, visibility 0s linear 0.9s; }

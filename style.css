@@ -79,39 +79,37 @@ body { background-color: #000; color: #eee; margin: 0; padding: 0; font-family: 
 .trail-cursor-char { position: fixed; pointer-events: none; z-index: 9998; opacity: 1; font-size: 1.5rem; line-height: 1; transform: translate(-50%, -50%); animation: cursor-color-change-text 4s linear infinite, fall-fade-char 1.0s linear forwards; }
 @keyframes fall-fade-char { 0% { transform: translate(-50%, -50%) translateY(0); opacity: 1; } 100% { transform: translate(-50%, -50%) translateY(30vh); opacity: 0; } }
 
-/* --- Ticker Bar Simulation Styles START (Restored Intentional Styles) --- */
+/* --- Ticker Line Simulation Styles START --- */
 .ticker-container {
     position: fixed; top: 50%; transform: translateY(-50%);
     width: 150px; height: 80px; z-index: 5;
-    display: flex; align-items: flex-end; /* Bars grow from bottom */
-    overflow: hidden; /* Hide bars that scroll off */
-    background-color: rgba(0, 0, 0, 0.5); /* Black semi-transparent background */
+    display: flex; align-items: flex-end; overflow: hidden;
+    background-color: #000; /* Black background */
     opacity: 0; /* Start hidden */
-    transition: opacity 0.5s ease 1s; /* Fade in after main content */
-    padding: 0 2px; box-sizing: border-box;
+    transition: opacity 0.5s ease 1s; /* Fade in */
+    padding: 0 1px; /* Minimal padding */
+    box-sizing: border-box;
     border: none; /* No border */
-    filter: drop-shadow(0 0 4px rgba(157, 0, 255, 0.4)); /* Optional faint glow */
+    filter: drop-shadow(0 0 4px rgba(157, 0, 255, 0.4)); /* Optional glow */
 }
-#main-content.visible .ticker-container {
-    opacity: 0.8; /* Make visible */
-}
+#main-content.visible .ticker-container { opacity: 0.85; }
 #ticker-container-left { left: 20px; }
 #ticker-container-right { right: 20px; }
 
-.ticker-bar {
-    flex-shrink: 0; /* Prevent bars from shrinking */
-    width: 4px; /* Width of each bar */
-    margin-right: 2px; /* Space between bars */
-    background-color: #9d00ff; /* Default/down color (purple) */
-    transition: height 0.15s ease-out; /* Smooth height change */
-    box-shadow: 0 0 3px currentColor; /* Neon glow */
-    border-radius: 1px; /* Slight rounding */
-    height: 10px; /* Default starting height before JS sets it */
+.ticker-bar { /* Renamed class used for lines too */
+    flex-shrink: 0;
+    width: 1px; /* <<< THIN LINE */
+    margin-right: 1px; /* Space between lines */
+    background-color: #ff0033; /* <<< DOWN COLOR = NEON RED */
+    transition: height 0.15s ease-out;
+    box-shadow: 0 0 2px currentColor, 0 0 3px currentColor; /* Neon glow */
+    /* border-radius: 1px; REMOVED */
+    height: 10px; /* Default starting height */
 }
 .ticker-bar:last-child { margin-right: 0; }
 
-/* Color for "up" bars */
+/* Color for "up" lines */
 .ticker-bar.bar-up {
-    background-color: #ee82ee; /* Violet */
+    background-color: #9d00ff; /* <<< UP COLOR = NEON PURPLE */
 }
-/* --- Ticker Bar Simulation Styles END --- */
+/* --- Ticker Line Simulation Styles END --- */

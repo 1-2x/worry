@@ -15,25 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const volumeSlider = document.getElementById('volume-slider');
     const locationTextElement = document.getElementById('location-text');
     const typingCursorElement = document.getElementById('typing-cursor');
-
-    // --- Ticker Bar Elements & State ---
-    const tickerContainerLeft = document.getElementById('ticker-container-left');
-    const tickerContainerRight = document.getElementById('ticker-container-right');
-    console.log("Ticker Containers Selected:", tickerContainerLeft, tickerContainerRight);
-
-    let tickerIntervalLeft = null;
-    let tickerIntervalRight = null;
-    const tickerConfig = {
-        maxBars: 70, // Adjusted for thinner bars+margin
-        updateInterval: 120, // Faster update for ~8.4 sec loop
-        minHeight: 5, // px
-        maxHeight: 75, // px (relative to container height 80px)
-        upColorClass: 'bar-up', // Purple class
-        downColorClass: '' // Base style is red, so no class needed for down
-    };
-    let lastValueLeft = { value: tickerConfig.maxHeight / 2 };
-    let lastValueRight = { value: tickerConfig.maxHeight / 2 };
-
+    // Chart/Ticker elements REMOVED
 
     // --- Global State ---
     let visiblePopupForTilt = null; let lastTrailTime = 0; const trailInterval = 50;
@@ -47,73 +29,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationString = "London, UK"; const typeSpeed = 180; const deleteSpeed = 120; const pauseDuration = 2500; let locationCharIndex = 0; let locationIsDeleting = false; let locationLoopTimeout;
     function typeDeleteLoop() { clearTimeout(locationLoopTimeout); const cursor = typingCursorElement; if (!locationTextElement || !cursor) return; if (!locationIsDeleting) { if (locationCharIndex < locationString.length) { const letterSpan = document.createElement('span'); letterSpan.textContent = locationString.charAt(locationCharIndex); locationTextElement.insertBefore(letterSpan, cursor); locationCharIndex++; locationLoopTimeout = setTimeout(typeDeleteLoop, typeSpeed); } else { locationIsDeleting = true; if (cursor) cursor.style.animationPlayState = 'paused'; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration); } } else { const letterSpans = locationTextElement.querySelectorAll('span:not(#typing-cursor)'); if (letterSpans.length > 0) { if (cursor) cursor.style.animationPlayState = 'running'; locationTextElement.removeChild(letterSpans[letterSpans.length - 1]); locationLoopTimeout = setTimeout(typeDeleteLoop, deleteSpeed); } else { locationIsDeleting = false; locationCharIndex = 0; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration / 2); } } }
 
-    // --- Ticker Bar Simulation Logic START ---
-    function updateTicker(container, lastValueState) {
-        if (!container) return;
-
-        const newHeight = Math.random() * (tickerConfig.maxHeight - tickerConfig.minHeight) + tickerConfig.minHeight;
-        const currentValue = newHeight;
-        const isUp = currentValue >= lastValueState.value;
-        lastValueState.value = currentValue;
-
-        const bar = document.createElement('div');
-        bar.classList.add('ticker-bar'); // Base style is red
-
-        if (isUp) {
-            bar.classList.add(tickerConfig.upColorClass); // Add 'bar-up' for purple
-        }
-        // If down, it just uses the default red .ticker-bar style
-
-        bar.style.height = `${newHeight}px`; // Set random height
-
-        // console.log(`Adding bar to ${container.id}, height: ${newHeight.toFixed(0)}px, class: ${bar.className}`); // Optional log
-
-        container.insertBefore(bar, container.firstChild);
-
-        while (container.children.length > tickerConfig.maxBars) {
-            if (container.lastChild) { container.removeChild(container.lastChild); } else { break; }
-        }
-    }
-
-    function startTickerAnimation() {
-        console.log("Starting ticker bar animation...");
-        if (tickerIntervalLeft) clearInterval(tickerIntervalLeft);
-        if (tickerIntervalRight) clearInterval(tickerIntervalRight);
-
-        lastValueLeft = { value: tickerConfig.maxHeight / 2 };
-        lastValueRight = { value: tickerConfig.maxHeight / 2 };
-
-        if (tickerContainerLeft) {
-            tickerContainerLeft.innerHTML = ''; // Clear previous
-            tickerIntervalLeft = setInterval(() => updateTicker(tickerContainerLeft, lastValueLeft), tickerConfig.updateInterval);
-            console.log("Left ticker interval started.");
-        } else { console.error("Cannot start Left ticker: container not found!"); }
-
-        if (tickerContainerRight) {
-             tickerContainerRight.innerHTML = ''; // Clear previous
-            setTimeout(() => {
-                 tickerIntervalRight = setInterval(() => updateTicker(tickerContainerRight, lastValueRight), tickerConfig.updateInterval + 15);
-                 console.log("Right ticker interval started.");
-            }, 200); // Stagger start
-        } else { console.error("Cannot start Right ticker: container not found!"); }
-    }
-    // --- Ticker Bar Simulation Logic END ---
-
+    // --- Ticker/Chart Logic Removed ---
 
     // --- Entry Screen Logic ---
     entryScreen.addEventListener('click', () => {
         console.log("Entry screen clicked!");
-        entryScreen.classList.add('hidden'); setTimeout(() => { entryScreen.style.display = 'none'; mainContent.classList.add('visible'); if (volumeContainer) { volumeContainer.classList.add('visible'); } backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); }); updateVolumeUI(); if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); }
-        startTickerAnimation(); // <<< Start Ticker Bar Simulation
+        entryScreen.classList.add('hidden'); setTimeout(() => {
+            entryScreen.style.display = 'none';
+            mainContent.classList.add('visible');
+            if (volumeContainer) { volumeContainer.classList.add('visible'); }
+            backgroundMusic.play().catch(error => { console.warn("Autoplay failed.", error); });
+            updateVolumeUI();
+            if (locationTextElement && typingCursorElement) { setTimeout(typeDeleteLoop, 800); }
+            // No chart/ticker start needed
         }, 500);
     }, { once: true });
 
 
     // --- Cursor Tracking, Popup Tilt, Falling Trail ---
-    document.addEventListener('mousemove', (e) => { if (customCursor) { customCursor.style.left = `${e.clientX}px`; customCursor.style.top = `${e.clientY}px`; } if(visiblePopupForTilt) { tiltPopup(e, visiblePopupForTilt); } const now = Date.now(); if (now - lastTrailTime > trailInterval) { createFallingTrailChar(e.clientX, e.clientY); lastTrailTime = now; } });
+    document.addEventListener('mousemove', (e) => {
+        if (customCursor) { customCursor.style.left = `${e.clientX}px`; customCursor.style.top = `${e.clientY}px`; }
+        if(visiblePopupForTilt) { tiltPopup(e, visiblePopupForTilt); } // Tilt active popup
+        const now = Date.now();
+        if (now - lastTrailTime > trailInterval) { createFallingTrailChar(e.clientX, e.clientY); lastTrailTime = now; }
+    });
+
     function createFallingTrailChar(x, y) { const trailEl = document.createElement('div'); trailEl.classList.add('trail-cursor-char'); trailEl.textContent = '𖹭'; trailEl.style.left = `${x}px`; trailEl.style.top = `${y}px`; document.body.appendChild(trailEl); setTimeout(() => { trailEl.remove(); }, 1000); } // Match fall animation
-    function tiltPopup(e, popupElement) { const centerX = window.innerWidth / 2; const centerY = window.innerHeight / 2; const deltaX = e.clientX - centerX; const deltaY = e.clientY - centerY; const maxRotate = 15; const rotateY = -(deltaX / centerX) * maxRotate; const rotateX = (deltaY / centerY) * maxRotate; const clampedRotateX = Math.max(-maxRotate, Math.min(maxRotate, rotateX)); const clampedRotateY = Math.max(-maxRotate, Math.min(maxRotate, rotateY)); popupElement.style.transform = `translateX(-50%) rotateX(${clampedRotateX}deg) rotateY(${clampedRotateY}deg)`; }
-    function resetPopupTilt(popupElement) { if(popupElement) { popupElement.style.transform = `translateX(-50%) rotateX(0deg) rotateY(0deg)`; } }
+
+    function tiltPopup(e, popupElement) {
+        const centerX = window.innerWidth / 2; const centerY = window.innerHeight / 2;
+        const deltaX = e.clientX - centerX; const deltaY = e.clientY - centerY;
+        const maxRotate = 15; // Tilt intensity kept from previous step
+        const rotateY = -(deltaX / centerX) * maxRotate;
+        const rotateX = (deltaY / centerY) * maxRotate;
+        const clampedRotateX = Math.max(-maxRotate, Math.min(maxRotate, rotateX));
+        const clampedRotateY = Math.max(-maxRotate, Math.min(maxRotate, rotateY));
+        // Add translateZ based on distance from center for more 3D feel
+        const maxDist = Math.sqrt(centerX**2 + centerY**2);
+        const currentDist = Math.sqrt(deltaX**2 + deltaY**2);
+        const tiltAmount = Math.min(1, currentDist / (maxDist * 0.7)); // Normalize distance (adjust 0.7 sensitivity)
+        const translateZ = tiltAmount * 25; // Max lift towards viewer (adjust px value)
+
+        popupElement.style.transform = `translateX(-50%) translateZ(${translateZ}px) rotateX(${clampedRotateX}deg) rotateY(${clampedRotateY}deg)`;
+    }
+
+    function resetPopupTilt(popupElement) {
+         if(popupElement) {
+            // Reset all transforms including translateZ
+            popupElement.style.transform = `translateX(-50%) translateZ(0px) rotateX(0deg) rotateY(0deg)`;
+         }
+    }
 
      // --- Volume Control Logic ---
      function updateVolumeUI() { if (!backgroundMusic || !volumeIcon || !volumeSlider) return; volumeSlider.value = backgroundMusic.muted ? 0 : backgroundMusic.volume; if (backgroundMusic.muted || backgroundMusic.volume === 0) { volumeIcon.className = 'fa-solid fa-volume-xmark'; } else if (backgroundMusic.volume <= 0.5) { volumeIcon.className = 'fa-solid fa-volume-low'; } else { volumeIcon.className = 'fa-solid fa-volume-high'; } volumeIcon.classList.add('fa-solid'); }
@@ -130,8 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('contextmenu', event => event.preventDefault());
 
     // --- Close Popups when Clicking Outside Logic ---
-    document.addEventListener('click', function(event) { let clickedInsideAnyPopup = false; allPopups.forEach(p => { if (p.contains(event.target)) { clickedInsideAnyPopup = true; } }); let clickedOnAnyTrigger = false; popupTriggers.forEach(t => { if (t.contains(event.target)) { clickedOnAnyTrigger = true; } }); const volumeControl = document.getElementById('volume-control-container'); const isClickInsideVolume = volumeControl ? volumeControl.contains(event.target) : false; /* Removed chart canvas check */ if (!clickedInsideAnyPopup && !clickedOnAnyTrigger && !isClickInsideVolume) { closeAllPopups(); } });
-
-    // --- Canvas/Chart Logic Removed ---
+    document.addEventListener('click', function(event) { let clickedInsideAnyPopup = false; allPopups.forEach(p => { if (p.contains(event.target)) { clickedInsideAnyPopup = true; } }); let clickedOnAnyTrigger = false; popupTriggers.forEach(t => { if (t.contains(event.target)) { clickedOnAnyTrigger = true; } }); const volumeControl = document.getElementById('volume-control-container'); const isClickInsideVolume = volumeControl ? volumeControl.contains(event.target) : false; /* Removed chart check */ if (!clickedInsideAnyPopup && !clickedOnAnyTrigger && !isClickInsideVolume) { closeAllPopups(); } });
 
 }); // End of DOMContentLoaded listener

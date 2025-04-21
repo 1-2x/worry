@@ -44,9 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationString = "London, UK"; const typeSpeed = 180; const deleteSpeed = 120; const pauseDuration = 2500; let locationCharIndex = 0; let locationIsDeleting = false; let locationLoopTimeout;
     function typeDeleteLoop() { clearTimeout(locationLoopTimeout); const cursor = typingCursorElement; if (!locationTextElement || !cursor) return; if (!locationIsDeleting) { if (locationCharIndex < locationString.length) { const letterSpan = document.createElement('span'); letterSpan.textContent = locationString.charAt(locationCharIndex); locationTextElement.insertBefore(letterSpan, cursor); locationCharIndex++; locationLoopTimeout = setTimeout(typeDeleteLoop, typeSpeed); } else { locationIsDeleting = true; if (cursor) cursor.style.animationPlayState = 'paused'; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration); } } else { const letterSpans = locationTextElement.querySelectorAll('span:not(#typing-cursor)'); if (letterSpans.length > 0) { if (cursor) cursor.style.animationPlayState = 'running'; locationTextElement.removeChild(letterSpans[letterSpans.length - 1]); locationLoopTimeout = setTimeout(typeDeleteLoop, deleteSpeed); } else { locationIsDeleting = false; locationCharIndex = 0; locationLoopTimeout = setTimeout(typeDeleteLoop, pauseDuration / 2); } } }
 
-    // --- Ticker Bar Simulation Logic START (Force Styles) ---
+    // --- Ticker Bar Simulation Logic START (Force Styles & Logging) ---
     function updateTicker(container, lastValueState) {
-        if (!container) { return; } // Exit if container not found
+        if (!container) { return; }
 
         const newHeight = Math.random() * (tickerConfig.maxHeight - tickerConfig.minHeight) + tickerConfig.minHeight;
         const currentValue = newHeight;
@@ -54,19 +54,21 @@ document.addEventListener('DOMContentLoaded', () => {
         lastValueState.value = currentValue;
 
         const bar = document.createElement('div');
-        // bar.classList.add('ticker-bar'); // Bypass CSS class for now
+        // bar.classList.add('ticker-bar'); // Bypass CSS class
 
         // *** FORCE Essential Styles Directly ***
-        bar.style.width = '2px';
+        bar.style.width = '2px'; // Use slightly thicker for visibility
         bar.style.marginRight = '1px';
-        bar.style.height = `${newHeight}px`;
-        bar.style.backgroundColor = isUp ? tickerConfig.upColor : tickerConfig.downColor;
+        bar.style.height = `${newHeight}px`; // Use calculated height
+        bar.style.backgroundColor = isUp ? tickerConfig.upColor : tickerConfig.downColor; // Force purple/red directly
         bar.style.boxShadow = `0 0 3px ${isUp ? tickerConfig.upColor : tickerConfig.downColor}`; // Simple glow
-        bar.style.flexShrink = '0'; // Needed for flex items
+        bar.style.flexShrink = '0';
+        bar.style.display = 'block'; // Ensure display
+        bar.style.position = 'relative'; // Ensure display
+        bar.style.opacity = '1'; // Force opacity
 
-        console.log(`-- Adding bar to ${container.id}. Height: ${bar.style.height}, BGColor: ${bar.style.backgroundColor}`); // Log styles being applied
+        console.log(`-- Adding bar to ${container.id}. Height: ${bar.style.height}, BGColor: ${bar.style.backgroundColor}`);
 
-        // Check container before inserting
         console.log(`-- Container ${container.id} children BEFORE insert: ${container.children.length}`);
         container.insertBefore(bar, container.firstChild);
         console.log(`-- Container ${container.id} children AFTER insert: ${container.children.length}`);
@@ -75,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         while (container.children.length > tickerConfig.maxBars) {
             if (container.lastChild) { container.removeChild(container.lastChild); } else { break; }
         }
-        // console.log(`-- ${container.id} children AFTER cleanup: ${container.children.length}`);
+         // console.log(`-- ${container.id} children AFTER cleanup: ${container.children.length}`);
     }
 
     function startTickerAnimation() {

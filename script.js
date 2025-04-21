@@ -44,10 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function generateCandleDataSingle(previousClose) { const randFactor = (max, min = 0) => Math.random() * (max - min) + min; let open = previousClose + randFactor(2, -2); let close = open + randFactor(chartConfig.volatility, -chartConfig.volatility); open = Math.max(chartConfig.yMin, Math.min(chartConfig.yMax, open)); close = Math.max(chartConfig.yMin, Math.min(chartConfig.yMax, close)); let high = Math.max(open, close) + randFactor(chartConfig.wickVolatility); let low = Math.min(open, close) - randFactor(chartConfig.wickVolatility); high = Math.min(chartConfig.yMax + chartConfig.wickVolatility, high); low = Math.max(chartConfig.yMin - chartConfig.wickVolatility, low); return { open, high, low, close }; }
     function mapYChart(value, canvasHeight) { const range = chartConfig.yMax - chartConfig.yMin; if (range <= 0) return canvasHeight / 2; const scaledValue = ((value - chartConfig.yMin) / range); return canvasHeight - (scaledValue * canvasHeight); }
 
-    // --- Modified draw function with extensive logging ---
+    // --- Modified draw function ---
     function drawScrollingChart() {
-        if (!chartCtx || !chartCanvas || chartData.length === 0) return;
-        console.log(`--- Drawing Chart (${chartCanvas.id}) Frame ---`); // Log frame start
+        if (!chartCtx || !chartCanvas || !chartCanvas.width || !chartCanvas.height) {
+            console.warn(`Skipping drawScrollingChart - Ctx: ${!!chartCtx}, Canvas: ${!!chartCanvas}, W: ${chartCanvas?.width}, H: ${chartCanvas?.height}`);
+            return;
+        }
+        // Log entry only once per few frames if needed to reduce noise
+        // console.log(`--- Drawing Chart (${chartCanvas.id}) Frame ---`);
 
         chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
         const stepX = chartCanvas.width / chartConfig.pointsToShow;
@@ -55,9 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // *** Draw Test Square ***
         chartCtx.fillStyle = 'yellow';
-        chartCtx.fillRect(5, 5, 20, 20); // Draw small yellow square at top-left
-        console.log("   - Drew yellow debug square.");
+        chartCtx.fillRect(0, 0, chartCanvas.width, chartCanvas.height); // Fill whole canvas yellow
+        console.log("   - Filled canvas yellow.");
 
+        // Draw actual candles (will draw over the yellow)
         for (let i = 0; i < chartData.length; i++) {
             const data = chartData[i];
             const xPos = (i * stepX) + (stepX / 2);
@@ -69,11 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const isUp = data.close >= data.open;
             const color = isUp ? chartConfig.upColor : chartConfig.downColor;
 
-            // Log calculated values for the first candle each frame
+             // Log calculated values for the first candle each frame
             if (i === 0) {
-                 console.log(`   - Candle[0]: O=${data.open.toFixed(1)} H=${data.high.toFixed(1)} L=${data.low.toFixed(1)} C=${data.close.toFixed(1)}`);
-                 console.log(`   - Mapped Ys: openY=${openY.toFixed(1)} highY=${highY.toFixed(1)} lowY=${lowY.toFixed(1)} closeY=${closeY.toFixed(1)}`);
-                 console.log(`   - Drawing Style: color=${color}, wickWidth=${chartConfig.wickWidth}, bodyWidth=${bodyWidth.toFixed(1)}`);
+                 console.log(`   - Candle[0] Calc: x=${xPos.toFixed(1)} oY=${openY.toFixed(1)} hY=${highY.toFixed(1)} lY=${lowY.toFixed(1)} cY=${closeY.toFixed(1)} | Color=${color}`);
             }
 
             // Style
@@ -88,16 +91,16 @@ document.addEventListener('DOMContentLoaded', () => {
             chartCtx.rect(xPos - bodyWidth / 2, bodyY, bodyWidth, bodyHeight); chartCtx.fill();
         }
         chartCtx.shadowColor = 'transparent'; chartCtx.shadowBlur = 0;
-        console.log(`--- Finished Drawing Chart (${chartCanvas.id}) Frame ---`); // Log frame end
+        // console.log(`--- Finished Drawing Chart (${chartCanvas.id}) Frame ---`);
     }
 
     function updateAndDrawScrollingChart() {
-        if (!chartCtx || !chartCanvas) return;
+        if (!chartCtx || !chartCanvas) return; // Extra safety check
         const newCandleData = generateCandleDataSingle(lastClose);
         lastClose = newCandleData.close;
         chartData.push(newCandleData);
         while (chartData.length > chartConfig.pointsToShow) { chartData.shift(); }
-        drawScrollingChart();
+        drawScrollingChart(); // Call the drawing function
     }
 
     function startScrollingChartAnimation() {
@@ -109,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastClose = chartData[chartData.length - 1]?.close || initialClose;
 
         if (chartCtx && chartCanvas) {
-            resizeChartCanvas();
+            resizeChartCanvas(); // Initial size set & draw
             chartInterval = setInterval(updateAndDrawScrollingChart, chartConfig.updateInterval);
             console.log("Scrolling chart interval started.");
         } else { console.error("Cannot start chart animation - canvas or context missing."); }
